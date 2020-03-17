@@ -1,0 +1,9 @@
+version: '3'
+services:
+  user:
+    build:
+      context: ./
+      dockerfile: user/Dockerfile
+    container_name: 2929user
+    ports:
+      - "50051:50051"
