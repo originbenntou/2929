@@ -19,4 +19,3 @@ ENV TZ Asia/Tokyo
 COPY --from=builder /go/bin/user /go/bin/user
 
 ENTRYPOINT ["/go/bin/user"]
-

@@ -3,10 +3,17 @@ services:
   user:
     build:
       context: ./
-      dockerfile: user/Dockerfile
+      # prd
+      # dockerfile: user/Dockerfile
+      # local
+      dockerfile: user/docker-local/Dockerfile
     container_name: 2929user
+    tty: true
     ports:
-      - "50051:50051"
+      - "8080:8080"
+    volumes:
+      # local
+      - ./user:/go/src/github.com/originbenntou/2929BE/user
   mysql:
     build:
       context: ./
