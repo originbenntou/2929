@@ -7,3 +7,18 @@ services:
     container_name: 2929user
     ports:
       - "50051:50051"
+  mysql:
+    build:
+      context: ./
+      dockerfile: mysql/Dockerfile
+    container_name: 2929mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: account
+      MYSQL_USER: 2929
+      MYSQL_PASSWORD: 2929
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
