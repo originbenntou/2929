@@ -1,15 +1,58 @@
 type Query {
   user(id: ID!): User
-  text(textCondition: TextCondition!): Text
+  text(textCondition: TextCondition!): [Text]
+}
+
+type Mutation {
+  createText(textCreateInput: TextCreateInput!): Text!
+  updateText(textUpdateInput: TextUpdateInput!): Text!
+  deleteText(textDeleteInput: TextDeleteInput!): MutationResult!
 }
 
 type Text {
   textId: ID!
   textData: String!
+  length: Int!
+  bot: Boolean!
+  version: Float!
+  rank: Rank!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
+enum Rank {
+  GOLD
+  SILVER
+  COPPER
+}
+
+scalar DateTime
+
 input TextCondition {
+  textId: [ID]!
+}
+
+input TextCreateInput {
+  textData: String!
+}
+
+input TextUpdateInput {
   textId: ID!
+  textData: String!
+}
+
+input TextDeleteInput {
+  textId: [ID]!
+}
+
+type MutationResult {
+  errorCode: String!
+  validationError: [ValidationError]
+}
+
+type ValidationError {
+  fieldName: String!
+  validationCode: String!
 }
 
 type User {

@@ -2,21 +2,99 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Group struct {
 	ID string `json:"id"`
 }
 
+type MutationResult struct {
+	ErrorCode       string             `json:"errorCode"`
+	ValidationError []*ValidationError `json:"validationError"`
+}
+
 type Text struct {
-	TextID   string `json:"textId"`
-	TextData string `json:"textData"`
+	TextID    string  `json:"textId"`
+	TextData  string  `json:"textData"`
+	Length    int     `json:"length"`
+	Bot       bool    `json:"bot"`
+	Version   float64 `json:"version"`
+	Rank      Rank    `json:"rank"`
+	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
 }
 
 type TextCondition struct {
-	TextID string `json:"textId"`
+	TextID []*string `json:"textId"`
+}
+
+type TextCreateInput struct {
+	TextData string `json:"textData"`
+}
+
+type TextDeleteInput struct {
+	TextID []*string `json:"textId"`
+}
+
+type TextUpdateInput struct {
+	TextID   string `json:"textId"`
+	TextData string `json:"textData"`
 }
 
 type User struct {
 	ID     string   `json:"id"`
 	Name   string   `json:"name"`
 	Groups []*Group `json:"groups"`
+}
+
+type ValidationError struct {
+	FieldName      string `json:"fieldName"`
+	ValidationCode string `json:"validationCode"`
+}
+
+type Rank string
+
+const (
+	RankGold   Rank = "GOLD"
+	RankSilver Rank = "SILVER"
+	RankCopper Rank = "COPPER"
+)
+
+var AllRank = []Rank{
+	RankGold,
+	RankSilver,
+	RankCopper,
+}
+
+func (e Rank) IsValid() bool {
+	switch e {
+	case RankGold, RankSilver, RankCopper:
+		return true
+	}
+	return false
+}
+
+func (e Rank) String() string {
+	return string(e)
+}
+
+func (e *Rank) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Rank(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Rank", str)
+	}
+	return nil
+}
+
+func (e Rank) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

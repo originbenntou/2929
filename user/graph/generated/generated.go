@@ -34,6 +34,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -45,14 +46,31 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	Mutation struct {
+		CreateText func(childComplexity int, textCreateInput model.TextCreateInput) int
+		DeleteText func(childComplexity int, textDeleteInput model.TextDeleteInput) int
+		UpdateText func(childComplexity int, textUpdateInput model.TextUpdateInput) int
+	}
+
+	MutationResult struct {
+		ErrorCode       func(childComplexity int) int
+		ValidationError func(childComplexity int) int
+	}
+
 	Query struct {
-		Text func(childComplexity int, textCondition *model.TextCondition) int
+		Text func(childComplexity int, textCondition model.TextCondition) int
 		User func(childComplexity int, id string) int
 	}
 
 	Text struct {
-		TextData func(childComplexity int) int
-		TextID   func(childComplexity int) int
+		Bot       func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Length    func(childComplexity int) int
+		Rank      func(childComplexity int) int
+		TextData  func(childComplexity int) int
+		TextID    func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		Version   func(childComplexity int) int
 	}
 
 	User struct {
@@ -60,11 +78,21 @@ type ComplexityRoot struct {
 		ID     func(childComplexity int) int
 		Name   func(childComplexity int) int
 	}
+
+	ValidationError struct {
+		FieldName      func(childComplexity int) int
+		ValidationCode func(childComplexity int) int
+	}
 }
 
+type MutationResolver interface {
+	CreateText(ctx context.Context, textCreateInput model.TextCreateInput) (*model.Text, error)
+	UpdateText(ctx context.Context, textUpdateInput model.TextUpdateInput) (*model.Text, error)
+	DeleteText(ctx context.Context, textDeleteInput model.TextDeleteInput) (*model.MutationResult, error)
+}
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*model.User, error)
-	Text(ctx context.Context, textCondition *model.TextCondition) (*model.Text, error)
+	Text(ctx context.Context, textCondition model.TextCondition) ([]*model.Text, error)
 }
 
 type executableSchema struct {
@@ -89,6 +117,56 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Group.ID(childComplexity), true
 
+	case "Mutation.createText":
+		if e.complexity.Mutation.CreateText == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createText_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateText(childComplexity, args["textCreateInput"].(model.TextCreateInput)), true
+
+	case "Mutation.deleteText":
+		if e.complexity.Mutation.DeleteText == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteText_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteText(childComplexity, args["textDeleteInput"].(model.TextDeleteInput)), true
+
+	case "Mutation.updateText":
+		if e.complexity.Mutation.UpdateText == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateText_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateText(childComplexity, args["textUpdateInput"].(model.TextUpdateInput)), true
+
+	case "MutationResult.errorCode":
+		if e.complexity.MutationResult.ErrorCode == nil {
+			break
+		}
+
+		return e.complexity.MutationResult.ErrorCode(childComplexity), true
+
+	case "MutationResult.validationError":
+		if e.complexity.MutationResult.ValidationError == nil {
+			break
+		}
+
+		return e.complexity.MutationResult.ValidationError(childComplexity), true
+
 	case "Query.text":
 		if e.complexity.Query.Text == nil {
 			break
@@ -99,7 +177,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Text(childComplexity, args["textCondition"].(*model.TextCondition)), true
+		return e.complexity.Query.Text(childComplexity, args["textCondition"].(model.TextCondition)), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -112,6 +190,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
+
+	case "Text.bot":
+		if e.complexity.Text.Bot == nil {
+			break
+		}
+
+		return e.complexity.Text.Bot(childComplexity), true
+
+	case "Text.createdAt":
+		if e.complexity.Text.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Text.CreatedAt(childComplexity), true
+
+	case "Text.length":
+		if e.complexity.Text.Length == nil {
+			break
+		}
+
+		return e.complexity.Text.Length(childComplexity), true
+
+	case "Text.rank":
+		if e.complexity.Text.Rank == nil {
+			break
+		}
+
+		return e.complexity.Text.Rank(childComplexity), true
 
 	case "Text.textData":
 		if e.complexity.Text.TextData == nil {
@@ -126,6 +232,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Text.TextID(childComplexity), true
+
+	case "Text.updatedAt":
+		if e.complexity.Text.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Text.UpdatedAt(childComplexity), true
+
+	case "Text.version":
+		if e.complexity.Text.Version == nil {
+			break
+		}
+
+		return e.complexity.Text.Version(childComplexity), true
 
 	case "User.groups":
 		if e.complexity.User.Groups == nil {
@@ -153,6 +273,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Name(childComplexity), true
 
+	case "ValidationError.fieldName":
+		if e.complexity.ValidationError.FieldName == nil {
+			break
+		}
+
+		return e.complexity.ValidationError.FieldName(childComplexity), true
+
+	case "ValidationError.validationCode":
+		if e.complexity.ValidationError.ValidationCode == nil {
+			break
+		}
+
+		return e.complexity.ValidationError.ValidationCode(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -170,6 +304,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			data := ec._Query(ctx, rc.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -205,16 +353,59 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	&ast.Source{Name: "graph/schema.graphqls", Input: `type Query {
   user(id: ID!): User
-  text(textCondition: TextCondition): Text
+  text(textCondition: TextCondition!): [Text]
+}
+
+type Mutation {
+  createText(textCreateInput: TextCreateInput!): Text!
+  updateText(textUpdateInput: TextUpdateInput!): Text!
+  deleteText(textDeleteInput: TextDeleteInput!): MutationResult!
 }
 
 type Text {
   textId: ID!
   textData: String!
+  length: Int!
+  bot: Boolean!
+  version: Float!
+  rank: Rank!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
+enum Rank {
+  GOLD
+  SILVER
+  COPPER
+}
+
+scalar DateTime
+
 input TextCondition {
+  textId: [ID]!
+}
+
+input TextCreateInput {
+  textData: String!
+}
+
+input TextUpdateInput {
   textId: ID!
+  textData: String!
+}
+
+input TextDeleteInput {
+  textId: [ID]!
+}
+
+type MutationResult {
+  errorCode: String!
+  validationError: [ValidationError]
+}
+
+type ValidationError {
+  fieldName: String!
+  validationCode: String!
 }
 
 type User {
@@ -234,6 +425,48 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createText_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.TextCreateInput
+	if tmp, ok := rawArgs["textCreateInput"]; ok {
+		arg0, err = ec.unmarshalNTextCreateInput2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCreateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["textCreateInput"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteText_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.TextDeleteInput
+	if tmp, ok := rawArgs["textDeleteInput"]; ok {
+		arg0, err = ec.unmarshalNTextDeleteInput2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextDeleteInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["textDeleteInput"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateText_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.TextUpdateInput
+	if tmp, ok := rawArgs["textUpdateInput"]; ok {
+		arg0, err = ec.unmarshalNTextUpdateInput2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextUpdateInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["textUpdateInput"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -251,9 +484,9 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_text_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.TextCondition
+	var arg0 model.TextCondition
 	if tmp, ok := rawArgs["textCondition"]; ok {
-		arg0, err = ec.unmarshalOTextCondition2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCondition(ctx, tmp)
+		arg0, err = ec.unmarshalNTextCondition2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCondition(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -360,6 +593,194 @@ func (ec *executionContext) _Group_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createText(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createText_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateText(rctx, args["textCreateInput"].(model.TextCreateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Text)
+	fc.Result = res
+	return ec.marshalNText2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateText(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateText_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateText(rctx, args["textUpdateInput"].(model.TextUpdateInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Text)
+	fc.Result = res
+	return ec.marshalNText2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteText(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteText_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteText(rctx, args["textDeleteInput"].(model.TextDeleteInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.MutationResult)
+	fc.Result = res
+	return ec.marshalNMutationResult2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐMutationResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutationResult_errorCode(ctx context.Context, field graphql.CollectedField, obj *model.MutationResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "MutationResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ErrorCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _MutationResult_validationError(ctx context.Context, field graphql.CollectedField, obj *model.MutationResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "MutationResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ValidationError, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ValidationError)
+	fc.Result = res
+	return ec.marshalOValidationError2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐValidationError(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -422,7 +843,7 @@ func (ec *executionContext) _Query_text(ctx context.Context, field graphql.Colle
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Text(rctx, args["textCondition"].(*model.TextCondition))
+		return ec.resolvers.Query().Text(rctx, args["textCondition"].(model.TextCondition))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -431,9 +852,9 @@ func (ec *executionContext) _Query_text(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Text)
+	res := resTmp.([]*model.Text)
 	fc.Result = res
-	return ec.marshalOText2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx, field.Selections, res)
+	return ec.marshalOText2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -573,6 +994,210 @@ func (ec *executionContext) _Text_textData(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Text_length(ctx context.Context, field graphql.CollectedField, obj *model.Text) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Text",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Length, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Text_bot(ctx context.Context, field graphql.CollectedField, obj *model.Text) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Text",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bot, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Text_version(ctx context.Context, field graphql.CollectedField, obj *model.Text) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Text",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Text_rank(ctx context.Context, field graphql.CollectedField, obj *model.Text) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Text",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Rank, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Rank)
+	fc.Result = res
+	return ec.marshalNRank2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐRank(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Text_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Text) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Text",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Text_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Text) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Text",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNDateTime2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -680,6 +1305,74 @@ func (ec *executionContext) _User_groups(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*model.Group)
 	fc.Result = res
 	return ec.marshalNGroup2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐGroupᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ValidationError_fieldName(ctx context.Context, field graphql.CollectedField, obj *model.ValidationError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ValidationError",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FieldName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ValidationError_validationCode(ctx context.Context, field graphql.CollectedField, obj *model.ValidationError) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ValidationError",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ValidationCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1745,7 +2438,67 @@ func (ec *executionContext) unmarshalInputTextCondition(ctx context.Context, obj
 		switch k {
 		case "textId":
 			var err error
+			it.TextID, err = ec.unmarshalNID2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTextCreateInput(ctx context.Context, obj interface{}) (model.TextCreateInput, error) {
+	var it model.TextCreateInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "textData":
+			var err error
+			it.TextData, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTextDeleteInput(ctx context.Context, obj interface{}) (model.TextDeleteInput, error) {
+	var it model.TextDeleteInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "textId":
+			var err error
+			it.TextID, err = ec.unmarshalNID2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTextUpdateInput(ctx context.Context, obj interface{}) (model.TextUpdateInput, error) {
+	var it model.TextUpdateInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "textId":
+			var err error
 			it.TextID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "textData":
+			var err error
+			it.TextData, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -1779,6 +2532,76 @@ func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createText":
+			out.Values[i] = ec._Mutation_createText(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateText":
+			out.Values[i] = ec._Mutation_updateText(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteText":
+			out.Values[i] = ec._Mutation_deleteText(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var mutationResultImplementors = []string{"MutationResult"}
+
+func (ec *executionContext) _MutationResult(ctx context.Context, sel ast.SelectionSet, obj *model.MutationResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MutationResult")
+		case "errorCode":
+			out.Values[i] = ec._MutationResult_errorCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "validationError":
+			out.Values[i] = ec._MutationResult_validationError(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1863,6 +2686,36 @@ func (ec *executionContext) _Text(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "length":
+			out.Values[i] = ec._Text_length(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "bot":
+			out.Values[i] = ec._Text_bot(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "version":
+			out.Values[i] = ec._Text_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "rank":
+			out.Values[i] = ec._Text_rank(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Text_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Text_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1897,6 +2750,38 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "groups":
 			out.Values[i] = ec._User_groups(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var validationErrorImplementors = []string{"ValidationError"}
+
+func (ec *executionContext) _ValidationError(ctx context.Context, sel ast.SelectionSet, obj *model.ValidationError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, validationErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ValidationError")
+		case "fieldName":
+			out.Values[i] = ec._ValidationError_fieldName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "validationCode":
+			out.Values[i] = ec._ValidationError_validationCode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2170,6 +3055,34 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNDateTime2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalString(v)
+}
+
+func (ec *executionContext) marshalNDateTime2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	return graphql.UnmarshalFloat(v)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
 func (ec *executionContext) marshalNGroup2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v model.Group) graphql.Marshaler {
 	return ec._Group(ctx, sel, &v)
 }
@@ -2235,6 +3148,72 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
+func (ec *executionContext) unmarshalNID2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalOID2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNID2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOID2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNMutationResult2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐMutationResult(ctx context.Context, sel ast.SelectionSet, v model.MutationResult) graphql.Marshaler {
+	return ec._MutationResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMutationResult2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐMutationResult(ctx context.Context, sel ast.SelectionSet, v *model.MutationResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._MutationResult(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRank2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐRank(ctx context.Context, v interface{}) (model.Rank, error) {
+	var res model.Rank
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNRank2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐRank(ctx context.Context, sel ast.SelectionSet, v model.Rank) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2247,6 +3226,36 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNText2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx context.Context, sel ast.SelectionSet, v model.Text) graphql.Marshaler {
+	return ec._Text(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNText2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx context.Context, sel ast.SelectionSet, v *model.Text) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Text(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTextCondition2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCondition(ctx context.Context, v interface{}) (model.TextCondition, error) {
+	return ec.unmarshalInputTextCondition(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNTextCreateInput2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCreateInput(ctx context.Context, v interface{}) (model.TextCreateInput, error) {
+	return ec.unmarshalInputTextCreateInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNTextDeleteInput2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextDeleteInput(ctx context.Context, v interface{}) (model.TextDeleteInput, error) {
+	return ec.unmarshalInputTextDeleteInput(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNTextUpdateInput2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextUpdateInput(ctx context.Context, v interface{}) (model.TextUpdateInput, error) {
+	return ec.unmarshalInputTextUpdateInput(ctx, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2498,6 +3507,29 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
+func (ec *executionContext) unmarshalOID2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalID(v)
+}
+
+func (ec *executionContext) marshalOID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	return graphql.MarshalID(v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOID2string(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec.marshalOID2string(ctx, sel, *v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2525,23 +3557,51 @@ func (ec *executionContext) marshalOText2githubᚗcomᚋoriginbenntouᚋ2929BE�
 	return ec._Text(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalOText2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx context.Context, sel ast.SelectionSet, v []*model.Text) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOText2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalOText2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐText(ctx context.Context, sel ast.SelectionSet, v *model.Text) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Text(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOTextCondition2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCondition(ctx context.Context, v interface{}) (model.TextCondition, error) {
-	return ec.unmarshalInputTextCondition(ctx, v)
-}
-
-func (ec *executionContext) unmarshalOTextCondition2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCondition(ctx context.Context, v interface{}) (*model.TextCondition, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalOTextCondition2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐTextCondition(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalOUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
@@ -2553,6 +3613,57 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋoriginbenntouᚋ2929B
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOValidationError2githubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐValidationError(ctx context.Context, sel ast.SelectionSet, v model.ValidationError) graphql.Marshaler {
+	return ec._ValidationError(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOValidationError2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐValidationError(ctx context.Context, sel ast.SelectionSet, v []*model.ValidationError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOValidationError2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐValidationError(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOValidationError2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋuserᚋgraphᚋmodelᚐValidationError(ctx context.Context, sel ast.SelectionSet, v *model.ValidationError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ValidationError(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
