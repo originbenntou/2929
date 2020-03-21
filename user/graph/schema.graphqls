@@ -1,14 +1,13 @@
-type Query {
-  user(id: ID!): User
-  text(textCondition: TextCondition!): [Text]
+input User {
+  email: String!
+  password: String!
 }
 
-type Mutation {
-  createText(textCreateInput: TextCreateInput!): Text!
-  updateText(textUpdateInput: TextUpdateInput!): Text!
-  deleteText(textDeleteInput: TextDeleteInput!): MutationResult!
+type Result {
+  success: Boolean!
 }
 
+# tutorial
 type Text {
   textId: ID!
   textData: String!
@@ -20,6 +19,7 @@ type Text {
   updatedAt: DateTime!
 }
 
+# tutorial
 enum Rank {
   GOLD
   SILVER
@@ -28,39 +28,49 @@ enum Rank {
 
 scalar DateTime
 
+# tutorial
 input TextCondition {
   textId: [ID]!
 }
 
+# tutorial
 input TextCreateInput {
   textData: String!
 }
 
+# tutorial
 input TextUpdateInput {
   textId: ID!
   textData: String!
 }
 
+# tutorial
 input TextDeleteInput {
   textId: [ID]!
 }
 
+# tutorial
 type MutationResult {
   errorCode: String!
   validationError: [ValidationError]
 }
 
+# tutorial
 type ValidationError {
   fieldName: String!
   validationCode: String!
 }
 
-type User {
-  id: ID!
-  name: String!
-  groups(left: Boolean! = false): [Group!]!
+type Query {
+  verify(user: User!): Result!
+  # tutorial
+  text(textCondition: TextCondition!): [Text]
 }
 
-type Group {
-  id: ID!
+type Mutation {
+  create(user: User!): Result!
+  # tutorial
+  createText(textCreateInput: TextCreateInput!): Text!
+  updateText(textUpdateInput: TextUpdateInput!): Text!
+  deleteText(textDeleteInput: TextDeleteInput!): MutationResult!
 }

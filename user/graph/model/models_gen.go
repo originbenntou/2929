@@ -8,13 +8,13 @@ import (
 	"strconv"
 )
 
-type Group struct {
-	ID string `json:"id"`
-}
-
 type MutationResult struct {
 	ErrorCode       string             `json:"errorCode"`
 	ValidationError []*ValidationError `json:"validationError"`
+}
+
+type Result struct {
+	Success bool `json:"success"`
 }
 
 type Text struct {
@@ -46,9 +46,8 @@ type TextUpdateInput struct {
 }
 
 type User struct {
-	ID     string   `json:"id"`
-	Name   string   `json:"name"`
-	Groups []*Group `json:"groups"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type ValidationError struct {

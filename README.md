@@ -29,16 +29,33 @@
 ### リクエスト
 
 ```
-# ユーザー認証
 # ユーザー登録
+mutation {
+  create(user: {
+    email: "testuser@2929.co.jp"
+    password: "2929password"
+  }) {
+    success
+  }
+}
+```
+
+```
+# ユーザー認証
+query {
+  verify(user: {
+    email: "testuser@2929.co.jp"
+    password: "2929password"
+  }) {
+    success
+  }
+}
+```
+
+
+```
 # ユーザー更新
 # ユーザー削除
-```
-
-※curlだと以下
-
-```
-$ 
 ```
 
 ### 改修方法
