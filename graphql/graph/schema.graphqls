@@ -1,0 +1,76 @@
+input User {
+  email: String!
+  password: String!
+}
+
+type Result {
+  success: Boolean!
+}
+
+# tutorial
+type Text {
+  textId: ID!
+  textData: String!
+  length: Int!
+  bot: Boolean!
+  version: Float!
+  rank: Rank!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# tutorial
+enum Rank {
+  GOLD
+  SILVER
+  COPPER
+}
+
+scalar DateTime
+
+# tutorial
+input TextCondition {
+  textId: [ID]!
+}
+
+# tutorial
+input TextCreateInput {
+  textData: String!
+}
+
+# tutorial
+input TextUpdateInput {
+  textId: ID!
+  textData: String!
+}
+
+# tutorial
+input TextDeleteInput {
+  textId: [ID]!
+}
+
+# tutorial
+type MutationResult {
+  errorCode: String!
+  validationError: [ValidationError]
+}
+
+# tutorial
+type ValidationError {
+  fieldName: String!
+  validationCode: String!
+}
+
+type Query {
+  verify(user: User!): Result!
+  # tutorial
+  text(textCondition: TextCondition!): [Text]
+}
+
+type Mutation {
+  create(user: User!): Result!
+  # tutorial
+  createText(textCreateInput: TextCreateInput!): Text!
+  updateText(textUpdateInput: TextUpdateInput!): Text!
+  deleteText(textDeleteInput: TextDeleteInput!): MutationResult!
+}

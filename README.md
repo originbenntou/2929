@@ -110,3 +110,10 @@ https://noumenon-th.net/programming/2019/09/20/go-sql-driver/
 
 - `gqlgen generate` Make化
 - GraphQL本を読もう...
+
+## protobuf
+
+```
+# user proto 生成
+$ make gen_proto SERVICE=user
+```

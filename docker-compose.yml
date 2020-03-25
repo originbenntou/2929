@@ -1,19 +1,18 @@
 version: '3'
 services:
-  user:
+  graphql:
     build:
       context: ./
       # prd
-      # dockerfile: user/Dockerfile
+      # dockerfile: graphql/Dockerfile
       # local
-      dockerfile: user/docker-local/Dockerfile
-    container_name: 2929user
-    tty: true
+      dockerfile: graphql/docker-local/Dockerfile
+    container_name: 2929graphql
     ports:
       - "8080:8080"
     volumes:
       # local
-      - ./user:/go/src/github.com/originbenntou/2929BE/user
+      - ./graphql:/go/src/github.com/originbenntou/2929BE/graphql
   mysql:
     build:
       context: ./
