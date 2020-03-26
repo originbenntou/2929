@@ -1,76 +1,44 @@
+type Query {
+  verifyUser(user: User!): Result!
+  findTrend(word: String!): [Suggest]!
+}
+
+type Mutation {
+  createUser(user: User!): Boolean!
+}
+
 input User {
   email: String!
   password: String!
 }
 
-type Result {
-  success: Boolean!
+type Suggest {
+  word: String!
+  childSuggests: [ChildSuggest!]!
+
 }
 
-# tutorial
-type Text {
-  textId: ID!
-  textData: String!
-  length: Int!
-  bot: Boolean!
-  version: Float!
-  rank: Rank!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+type ChildSuggest {
+  word: String!
+  growth: Growth!
+  graphs: [Graph!]!
 }
 
-# tutorial
-enum Rank {
-  GOLD
-  SILVER
-  COPPER
+type Growth {
+  short: Arrow!
+  midium: Arrow!
+  long: Arrow!
+}
+
+type Graph {
+  date: DateTime!
+  value: Float!
+}
+
+enum Arrow {
+  Up
+  Flat
+  Down
 }
 
 scalar DateTime
-
-# tutorial
-input TextCondition {
-  textId: [ID]!
-}
-
-# tutorial
-input TextCreateInput {
-  textData: String!
-}
-
-# tutorial
-input TextUpdateInput {
-  textId: ID!
-  textData: String!
-}
-
-# tutorial
-input TextDeleteInput {
-  textId: [ID]!
-}
-
-# tutorial
-type MutationResult {
-  errorCode: String!
-  validationError: [ValidationError]
-}
-
-# tutorial
-type ValidationError {
-  fieldName: String!
-  validationCode: String!
-}
-
-type Query {
-  verify(user: User!): Result!
-  # tutorial
-  text(textCondition: TextCondition!): [Text]
-}
-
-type Mutation {
-  create(user: User!): Result!
-  # tutorial
-  createText(textCreateInput: TextCreateInput!): Text!
-  updateText(textUpdateInput: TextUpdateInput!): Text!
-  deleteText(textDeleteInput: TextDeleteInput!): MutationResult!
-}
