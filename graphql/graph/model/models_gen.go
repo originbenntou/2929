@@ -8,41 +8,26 @@ import (
 	"strconv"
 )
 
-type MutationResult struct {
-	ErrorCode       string             `json:"errorCode"`
-	ValidationError []*ValidationError `json:"validationError"`
+type ChildSuggest struct {
+	Word   string   `json:"word"`
+	Growth *Growth  `json:"growth"`
+	Graphs []*Graph `json:"graphs"`
 }
 
-type Result struct {
-	Success bool `json:"success"`
+type Graph struct {
+	Date  string  `json:"date"`
+	Value float64 `json:"value"`
 }
 
-type Text struct {
-	TextID    string  `json:"textId"`
-	TextData  string  `json:"textData"`
-	Length    int     `json:"length"`
-	Bot       bool    `json:"bot"`
-	Version   float64 `json:"version"`
-	Rank      Rank    `json:"rank"`
-	CreatedAt string  `json:"createdAt"`
-	UpdatedAt string  `json:"updatedAt"`
+type Growth struct {
+	Short  Arrow `json:"short"`
+	Midium Arrow `json:"midium"`
+	Long   Arrow `json:"long"`
 }
 
-type TextCondition struct {
-	TextID []*string `json:"textId"`
-}
-
-type TextCreateInput struct {
-	TextData string `json:"textData"`
-}
-
-type TextDeleteInput struct {
-	TextID []*string `json:"textId"`
-}
-
-type TextUpdateInput struct {
-	TextID   string `json:"textId"`
-	TextData string `json:"textData"`
+type Suggest struct {
+	Word          string          `json:"word"`
+	ChildSuggests []*ChildSuggest `json:"childSuggests"`
 }
 
 type User struct {
@@ -50,50 +35,45 @@ type User struct {
 	Password string `json:"password"`
 }
 
-type ValidationError struct {
-	FieldName      string `json:"fieldName"`
-	ValidationCode string `json:"validationCode"`
-}
-
-type Rank string
+type Arrow string
 
 const (
-	RankGold   Rank = "GOLD"
-	RankSilver Rank = "SILVER"
-	RankCopper Rank = "COPPER"
+	ArrowUp   Arrow = "Up"
+	ArrowFlat Arrow = "Flat"
+	ArrowDown Arrow = "Down"
 )
 
-var AllRank = []Rank{
-	RankGold,
-	RankSilver,
-	RankCopper,
+var AllArrow = []Arrow{
+	ArrowUp,
+	ArrowFlat,
+	ArrowDown,
 }
 
-func (e Rank) IsValid() bool {
+func (e Arrow) IsValid() bool {
 	switch e {
-	case RankGold, RankSilver, RankCopper:
+	case ArrowUp, ArrowFlat, ArrowDown:
 		return true
 	}
 	return false
 }
 
-func (e Rank) String() string {
+func (e Arrow) String() string {
 	return string(e)
 }
 
-func (e *Rank) UnmarshalGQL(v interface{}) error {
+func (e *Arrow) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = Rank(str)
+	*e = Arrow(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Rank", str)
+		return fmt.Errorf("%s is not a valid Arrow", str)
 	}
 	return nil
 }
 
-func (e Rank) MarshalGQL(w io.Writer) {
+func (e Arrow) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

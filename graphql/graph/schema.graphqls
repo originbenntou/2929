@@ -1,6 +1,6 @@
 type Query {
-  verifyUser(user: User!): Result!
-  findTrend(word: String!): [Suggest]!
+  verifyUser(user: User!): Boolean!
+  findTrend(word: String!): [Suggest!]!
 }
 
 type Mutation {
@@ -15,7 +15,6 @@ input User {
 type Suggest {
   word: String!
   childSuggests: [ChildSuggest!]!
-
 }
 
 type ChildSuggest {
