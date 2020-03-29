@@ -99,21 +99,18 @@ https://qiita.com/SiragumoHuin/items/cc58f456bc43a1be41b4
 
 https://noumenon-th.net/programming/2019/09/20/go-sql-driver/
 
-## わからなかったこと
-
-### GraphQL
-
-- `ID：一意の識別子であることを示す以外はStringと同じ` らしいが、同じ文字列を与えてもバリデーションエラーにならない
-- GraphQLのエラーの出し方がわからない
-
-## Todo
-
-- `gqlgen generate` Make化
-- GraphQL本を読もう...
-
-## protobuf
+## make
 
 ```
 # user proto 生成
 $ make gen_proto SERVICE=user
 ```
+
+## Todo
+
+- `gqlgen generate` Make化
+- GraphQL本を読もう...
+    - エラー周り
+    - カスタムスカラー型
+    - バリデーション
+- go mod vendor に対応させたい

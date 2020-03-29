@@ -13,6 +13,19 @@ services:
     volumes:
       # local
       - ./graphql:/go/src/github.com/originbenntou/2929BE/graphql
+  account:
+    build:
+      context: ./
+      # prd
+      # dockerfile: account/Dockerfile
+      # local
+      dockerfile: account/docker-local/Dockerfile
+    container_name: 2929account
+    ports:
+      - "50051:50051"
+    volumes:
+      # local
+      - ./graphql:/go/src/github.com/originbenntou/2929BE/account
   mysql:
     build:
       context: ./
