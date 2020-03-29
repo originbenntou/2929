@@ -16,6 +16,6 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install $MAIN_PATH
 
 FROM alpine:latest
 ENV TZ Asia/Tokyo
-COPY --from=builder /go/bin/graphql /go/bin/account
+COPY --from=builder /go/bin/account /go/bin/account
 
 ENTRYPOINT ["/go/bin/account"]

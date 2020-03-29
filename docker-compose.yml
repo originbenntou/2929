@@ -10,8 +10,8 @@ services:
     container_name: 2929graphql
     ports:
       - "8080:8080"
+    # local
     volumes:
-      # local
       - ./graphql:/go/src/github.com/originbenntou/2929BE/graphql
   account:
     build:
@@ -23,9 +23,9 @@ services:
     container_name: 2929account
     ports:
       - "50051:50051"
+    # local
     volumes:
-      # local
-      - ./graphql:/go/src/github.com/originbenntou/2929BE/account
+      - ./account:/go/src/github.com/originbenntou/2929BE/account
   mysql:
     build:
       context: ./
