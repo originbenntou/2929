@@ -2,32 +2,23 @@ package usecase
 
 import (
 	"context"
-	"github.com/originbenntou/2929BE/account/domain/repository"
-	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
+	"github.com/originbenntou/2929BE/account/domain/service"
+	"github.com/originbenntou/2929BE/account/domain/valueobject/grpc/request"
+	"github.com/originbenntou/2929BE/account/domain/valueobject/grpc/response"
 )
 
 type UserUseCase interface {
-	CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error)
-	VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error)
-	FindUser(ctx context.Context, req *pbAccount.FindUserRequest) (*pbAccount.FindUserResponse, error)
+	CreateUser(ctx context.Context, req request.InsertUserRequest) (*response.InsertUserResponse, error)
 }
 
 type userUseCase struct {
-	repository.UserRepository
+	service.UserService
 }
 
-func NewUserUseCase(r repository.UserRepository) UserUseCase {
-	return &userUseCase{r}
+func NewUserUseCase(s service.UserService) UserUseCase {
+	return userUseCase{s}
 }
 
-func (u *userUseCase) CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error) {
-	return nil, nil
-}
-
-func (u *userUseCase) VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
-	return nil, nil
-}
-
-func (u *userUseCase) FindUser(ctx context.Context, req *pbAccount.FindUserRequest) (*pbAccount.FindUserResponse, error) {
-	return nil, nil
+func (u userUseCase) CreateUser(ctx context.Context, req request.InsertUserRequest) (*response.InsertUserResponse, error) {
+	return u.UserService.CreateUserService(ctx, req)
 }

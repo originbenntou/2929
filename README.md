@@ -103,7 +103,7 @@ https://noumenon-th.net/programming/2019/09/20/go-sql-driver/
 
 ```
 # user proto 生成
-$ make gen_proto SERVICE=user
+$ make gen_proto SERVICE=account
 ```
 
 ## Todo
