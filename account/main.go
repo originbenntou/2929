@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/originbenntou/2929BE/account/registry"
 	"log"
 	"net"
 	"os"
@@ -11,9 +12,9 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/validator"
-	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 	"github.com/originbenntou/2929BE/shared/interceptor"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const port = ":50051"
@@ -21,15 +22,15 @@ const port = ":50051"
 type AccountService struct {
 }
 
-func (s *AccountService) CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error) {
-	return nil, nil
-}
-func (s *AccountService) VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
-	return nil, nil
-}
-func (s *AccountService) FindUser(ctx context.Context, req *pbAccount.FindUserRequest) (*pbAccount.FindUserResponse, error) {
-	return nil, nil
-}
+//func (s *AccountService) CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error) {
+//	return nil, nil
+//}
+//func (s *AccountService) VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
+//	return nil, nil
+//}
+//func (s *AccountService) FindUser(ctx context.Context, req *pbAccount.FindUserRequest) (*pbAccount.FindUserResponse, error) {
+//	return nil, nil
+//}
 
 func main() {
 	srv := grpc.NewServer(
@@ -42,7 +43,10 @@ func main() {
 			interceptor.Logging(),
 		)),
 	)
-	pbAccount.RegisterUserServiceServer(srv, &AccountService{})
+	//pbAccount.RegisterUserServiceServer(srv, &AccountService{})
+
+	registry.NewRegistry(srv).Register()
+	reflection.Register(srv)
 
 	go func() {
 		listener, err := net.Listen("tcp", port)
