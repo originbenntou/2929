@@ -23,7 +23,8 @@ type AccountService struct {
 }
 
 //func (s *AccountService) CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error) {
-//	return nil, nil
+//	return &pbAccount.CreateUserResponse{
+//	}, nil
 //}
 //func (s *AccountService) VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
 //	return nil, nil

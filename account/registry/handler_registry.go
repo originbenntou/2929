@@ -1,10 +1,10 @@
 package registry
 
 import (
+	"github.com/originbenntou/2929BE/account/interfaces/handler"
 	"google.golang.org/grpc"
 
 	"github.com/originbenntou/2929BE/account/application/usecase"
-	"github.com/originbenntou/2929BE/account/interfaces/handler"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 )
 
