@@ -16,7 +16,9 @@ message User {
 
 message CreateUserRequest {
     string email = 1 [(validator.field) = {string_not_empty: true regex: "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"}];
-    bytes password = 2 [(validator.field) = {string_not_empty: true length_gt:7 length_lt:33}];
+    string password = 2 [(validator.field) = {string_not_empty: true regex: "^[ -~]{8,32}$"}];
+    string name = 3 [(validator.field) = {string_not_empty: true length_lt:255}];
+    uint64 company_id = 4 [(validator.field) = {int_gt: 0}];
 }
 
 message CreateUserResponse {

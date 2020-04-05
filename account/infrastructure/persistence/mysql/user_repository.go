@@ -41,7 +41,7 @@ func (u userMySQL) InsertUser(ctx context.Context, req request.InsertUserRequest
 		}
 	}()
 
-	result, err := insert.Exec(req.Email, req.PassHash, "", "0", time.Now().Format("2006-1-2 15:04:05"), time.Now().Format("2006-1-2 15:04:05"))
+	result, err := insert.Exec(req.Email, req.PassHash, req.Name, req.CompanyId, time.Now().Format("2006-1-2 15:04:05"), time.Now().Format("2006-1-2 15:04:05"))
 	if err != nil {
 		return nil, err
 	}

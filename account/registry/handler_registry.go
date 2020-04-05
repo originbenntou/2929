@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/originbenntou/2929BE/account/interfaces/handler"
+	"github.com/originbenntou/2929BE/account/interfaces/grpc/handler"
 	"google.golang.org/grpc"
 
 	"github.com/originbenntou/2929BE/account/application/usecase"

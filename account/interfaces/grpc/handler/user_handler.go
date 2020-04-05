@@ -24,8 +24,10 @@ func (h userHandler) CreateUser(ctx context.Context, pbReq *pbAccount.CreateUser
 	}
 
 	resp, err := h.UserUseCase.CreateUser(ctx, request.InsertUserRequest{
-		Email:    pbReq.GetEmail(),
-		PassHash: passHash,
+		Email:     pbReq.GetEmail(),
+		PassHash:  passHash,
+		Name:      pbReq.GetName(),
+		CompanyId: pbReq.GetCompanyId(),
 	})
 	if err != nil {
 		return nil, err
