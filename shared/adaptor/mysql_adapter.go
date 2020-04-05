@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type config interface {
+type Config interface {
 	GetHost() string
 	GetPort() string
 	GetUser() string
@@ -18,7 +18,7 @@ type config interface {
 	GetConnMaxLifetime() time.Duration
 }
 
-func NewMysqlConnection(c config) (*sql.DB, error) {
+func NewMysqlConnection(c Config) (*sql.DB, error) {
 	source := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", c.GetUser(), c.GetPassword(), c.GetHost(), c.GetPort(), c.GetDbname())
 	db, err := sql.Open("mysql", source)
 	if err != nil {

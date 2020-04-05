@@ -46,5 +46,16 @@ func init() {
 			maxOpenConns:    MaxOpenConns,
 			connMaxLifetime: ConnMaxLifetime,
 		}
+	default:
+		Config = accountConfig{
+			host:            "2929mysql",
+			port:            "3306",
+			user:            "2929",
+			password:        "2929",
+			dbname:          "account",
+			maxIdleConns:    MaxIdleConns,
+			maxOpenConns:    MaxOpenConns,
+			connMaxLifetime: ConnMaxLifetime,
+		}
 	}
 }

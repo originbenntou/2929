@@ -23,7 +23,9 @@ func (r registry) Register() {
 	h.RegisterAccountHandler(
 		r.GetAccountUsecase(
 			r.GetAccountService(
-				r.GetAccountRepository(),
+				r.GetAccountRepository(
+					r.GetAccountMySQL(),
+				),
 			),
 		),
 	)

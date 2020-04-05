@@ -26,10 +26,6 @@ func (s userService) CreateUserService(ctx context.Context, req request.InsertUs
 	}
 
 	return &response.InsertUserResponse{
-		Id:           resp.Id,
-		Email:        resp.Email,
-		PasswordHash: resp.Password,
-		Name:         resp.Name,
-		CompanyId:    resp.CompanyId,
+		Id: resp.Id,
 	}, nil
 }
