@@ -1,10 +1,10 @@
 package container
 
 import (
-	"github.com/originbenntou/2929BE/account/application/usecase"
-	"github.com/originbenntou/2929BE/account/domain/service"
+	"github.com/originbenntou/2929BE/account/application/service"
+	"github.com/originbenntou/2929BE/account/domain/repository"
 )
 
-func (c Container) GetAccountUsecase(s service.UserService) usecase.UserUseCase {
-	return usecase.NewUserUseCase(s)
+func (c Container) GetAccountService(r repository.UserRepository) service.UserService {
+	return service.NewUserService(r)
 }

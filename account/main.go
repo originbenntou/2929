@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"github.com/originbenntou/2929BE/account/constant"
 	"github.com/originbenntou/2929BE/account/registry"
+	"github.com/originbenntou/2929BE/shared/adaptor"
 	"log"
 	"net"
 	"os"
@@ -17,22 +19,6 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const port = ":50051"
-
-type AccountService struct {
-}
-
-//func (s *AccountService) CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error) {
-//	return &pbAccount.CreateUserResponse{
-//	}, nil
-//}
-//func (s *AccountService) VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
-//	return nil, nil
-//}
-//func (s *AccountService) FindUser(ctx context.Context, req *pbAccount.FindUserRequest) (*pbAccount.FindUserResponse, error) {
-//	return nil, nil
-//}
-
 func main() {
 	srv := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
@@ -44,18 +30,21 @@ func main() {
 			interceptor.Logging(),
 		)),
 	)
-	//pbAccount.RegisterUserServiceServer(srv, &AccountService{})
 
-	registry.NewRegistry(srv).Register()
+	conn, err := adaptor.NewMysqlConnection(constant.Config)
+	if err != nil {
+		log.Fatalf("failed to connect database: %s", err)
+	}
+
+	registry.NewRegistry(srv, conn).Register()
 	reflection.Register(srv)
 
 	go func() {
-		listener, err := net.Listen("tcp", port)
+		listener, err := net.Listen("tcp", constant.Port)
 		if err != nil {
-			log.Fatalf("failed to create listener: %s",
-				err)
+			log.Fatalf("failed to create listener: %s", err)
 		}
-		log.Println("start server on port", port)
+		log.Println("start server on port", constant.Port)
 		if err := srv.Serve(listener); err != nil {
 			log.Println("failed to exit serve: ", err)
 		}
