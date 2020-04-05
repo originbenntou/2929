@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"database/sql"
 	"github.com/originbenntou/2929BE/account/registry/container"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
+	"github.com/originbenntou/2929BE/shared/mysql"
 	"google.golang.org/grpc"
 )
 
@@ -13,18 +13,18 @@ type Registry interface {
 
 type registry struct {
 	*grpc.Server
-	*sql.DB
+	mysql.DBManager
 	container.Container //DI Container
 }
 
-func NewRegistry(gs *grpc.Server, db *sql.DB) Registry {
-	return &registry{gs, db, container.Container{}}
+func NewRegistry(s *grpc.Server, db mysql.DBManager) Registry {
+	return &registry{s, db, container.Container{}}
 }
 
 func (r registry) Register() {
 	pbAccount.RegisterUserServiceServer(r.Server,
 		r.GetAccountService(
-			r.GetAccountRepository(r.DB),
+			r.GetAccountRepository(r.DBManager),
 		),
 	)
 

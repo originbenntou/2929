@@ -2,19 +2,16 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
-	"github.com/originbenntou/2929BE/account/constant"
 	"github.com/originbenntou/2929BE/account/domain/model"
 	"github.com/originbenntou/2929BE/account/domain/repository"
-	"github.com/originbenntou/2929BE/shared/adaptor"
-	"time"
+	"github.com/originbenntou/2929BE/shared/mysql"
 )
 
 type userRepository struct {
-	*sql.DB
+	db mysql.DBManager
 }
 
-func NewUserRepository(db *sql.DB) repository.UserRepository {
+func NewUserRepository(db mysql.DBManager) repository.UserRepository {
 	return &userRepository{db}
 }
 
@@ -23,17 +20,15 @@ func (r userRepository) FindUserByEmail(ctx context.Context, email string) (*mod
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (uint64, error) {
-	db, err := adaptor.NewMysqlConnection(constant.Config)
-	if err != nil {
-		return 0, err
-	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			panic(err)
-		}
-	}()
+	//defer func() {
+	//	if err := r.db.Close(); err != nil {
+	//		panic(err)
+	//	}
+	//}()
 
-	insert, err := db.Prepare("INSERT INTO user(email, password, name, company_id, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?)")
+	q := "INSERT INTO user(email, password, name, company_id, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?)"
+
+	insert, err := r.db.Prepare(q)
 	if err != nil {
 		return 0, err
 	}
@@ -43,7 +38,7 @@ func (r userRepository) CreateUser(ctx context.Context, req *model.User) (uint64
 		}
 	}()
 
-	result, err := insert.Exec(req.Email, req.PassHash, req.Name, req.CompanyId, time.Now().Format("2006-1-2 15:04:05"), time.Now().Format("2006-1-2 15:04:05"))
+	result, err := insert.Exec(req.Email, req.PassHash, req.Name, req.CompanyId, req.CreatedAt, req.UpdatedAt)
 	if err != nil {
 		return 0, err
 	}

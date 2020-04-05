@@ -1,11 +1,11 @@
 package container
 
 import (
-	"database/sql"
 	"github.com/originbenntou/2929BE/account/domain/repository"
-	"github.com/originbenntou/2929BE/account/infrastructure/datastore/mysql"
+	repo "github.com/originbenntou/2929BE/account/infrastructure/datastore/mysql"
+	"github.com/originbenntou/2929BE/shared/mysql"
 )
 
-func (c Container) GetAccountRepository(db *sql.DB) repository.UserRepository {
-	return mysql.NewUserRepository(db)
+func (c Container) GetAccountRepository(db mysql.DBManager) repository.UserRepository {
+	return repo.NewUserRepository(db)
 }

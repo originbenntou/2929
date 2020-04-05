@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/originbenntou/2929BE/account/constant"
 	"github.com/originbenntou/2929BE/account/registry"
-	"github.com/originbenntou/2929BE/shared/adaptor"
+	"github.com/originbenntou/2929BE/shared/mysql"
 	"log"
 	"net"
 	"os"
@@ -31,12 +31,15 @@ func main() {
 		)),
 	)
 
-	conn, err := adaptor.NewMysqlConnection(constant.Config)
+	conn, err := mysql.NewDBConnection(constant.Config)
 	if err != nil {
 		log.Fatalf("failed to connect database: %s", err)
 	}
 
-	registry.NewRegistry(srv, conn).Register()
+	// DB操作をラップ
+	m := mysql.NewDBManager(conn)
+
+	registry.NewRegistry(srv, m).Register()
 	reflection.Register(srv)
 
 	go func() {
