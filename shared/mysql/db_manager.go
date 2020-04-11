@@ -51,14 +51,14 @@ type (
 	}
 )
 
-// dbManager is the manager of SQL.
-type dbManager struct {
-	Conn *sql.DB
-}
-
 // NewDBManager generates and returns DBManager.
 func NewDBManager(conn *sql.DB) DBManager {
 	return &dbManager{conn}
+}
+
+// dbManager is the manager of SQL.
+type dbManager struct {
+	Conn *sql.DB
 }
 
 // Exec executes SQL.
