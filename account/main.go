@@ -2,7 +2,12 @@ package main
 
 import (
 	"context"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	"github.com/originbenntou/2929BE/account/constant"
 	"github.com/originbenntou/2929BE/account/registry"
+	"github.com/originbenntou/2929BE/shared/interceptor"
+	"github.com/originbenntou/2929BE/shared/logger"
+	"github.com/originbenntou/2929BE/shared/mysql"
 	"log"
 	"net"
 	"os"
@@ -12,26 +17,9 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/validator"
-	"github.com/originbenntou/2929BE/shared/interceptor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
-
-const port = ":50051"
-
-type AccountService struct {
-}
-
-//func (s *AccountService) CreateUser(ctx context.Context, req *pbAccount.CreateUserRequest) (*pbAccount.CreateUserResponse, error) {
-//	return &pbAccount.CreateUserResponse{
-//	}, nil
-//}
-//func (s *AccountService) VerifyUser(ctx context.Context, req *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
-//	return nil, nil
-//}
-//func (s *AccountService) FindUser(ctx context.Context, req *pbAccount.FindUserRequest) (*pbAccount.FindUserResponse, error) {
-//	return nil, nil
-//}
 
 func main() {
 	srv := grpc.NewServer(
@@ -41,21 +29,28 @@ func main() {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_validator.UnaryServerInterceptor(),
 			interceptor.XTraceID(),
+			grpc_zap.UnaryServerInterceptor(logger.Logger),
 			interceptor.Logging(),
 		)),
 	)
-	//pbAccount.RegisterUserServiceServer(srv, &AccountService{})
 
-	registry.NewRegistry(srv).Register()
+	conn, err := mysql.NewDBConnection(constant.Config)
+	if err != nil {
+		log.Fatalf("failed to connect database: %s", err)
+	}
+
+	// DB操作をラップ
+	m := mysql.NewDBManager(conn)
+
+	registry.NewRegistry(srv, m).Register()
 	reflection.Register(srv)
 
 	go func() {
-		listener, err := net.Listen("tcp", port)
+		listener, err := net.Listen("tcp", constant.Port)
 		if err != nil {
-			log.Fatalf("failed to create listener: %s",
-				err)
+			log.Fatalf("failed to create listener: %s", err)
 		}
-		log.Println("start server on port", port)
+		log.Println("start server on port", constant.Port)
 		if err := srv.Serve(listener); err != nil {
 			log.Println("failed to exit serve: ", err)
 		}

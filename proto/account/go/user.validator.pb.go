@@ -21,17 +21,17 @@ func (this *User) Validate() error {
 	return nil
 }
 
-var _regex_CreateUserRequest_Email = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
-var _regex_CreateUserRequest_Password = regexp.MustCompile(`^[ -~]{8,32}$`)
+var _regex_RegisterUserRequest_Email = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
+var _regex_RegisterUserRequest_Password = regexp.MustCompile(`^[ -~]{8,32}$`)
 
-func (this *CreateUserRequest) Validate() error {
-	if !_regex_CreateUserRequest_Email.MatchString(this.Email) {
+func (this *RegisterUserRequest) Validate() error {
+	if !_regex_RegisterUserRequest_Email.MatchString(this.Email) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Email", fmt.Errorf(`value '%v' must be a string conforming to regex "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"`, this.Email))
 	}
 	if this.Email == "" {
 		return github_com_mwitkow_go_proto_validators.FieldError("Email", fmt.Errorf(`value '%v' must not be an empty string`, this.Email))
 	}
-	if !_regex_CreateUserRequest_Password.MatchString(this.Password) {
+	if !_regex_RegisterUserRequest_Password.MatchString(this.Password) {
 		return github_com_mwitkow_go_proto_validators.FieldError("Password", fmt.Errorf(`value '%v' must be a string conforming to regex "^[ -~]{8,32}$"`, this.Password))
 	}
 	if this.Password == "" {
@@ -48,11 +48,6 @@ func (this *CreateUserRequest) Validate() error {
 	}
 	return nil
 }
-func (this *CreateUserResponse) Validate() error {
-	if this.User != nil {
-		if err := github_com_mwitkow_go_proto_validators.CallValidatorIfExists(this.User); err != nil {
-			return github_com_mwitkow_go_proto_validators.FieldError("User", err)
-		}
-	}
+func (this *RegisterUserResponse) Validate() error {
 	return nil
 }

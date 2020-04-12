@@ -2,52 +2,35 @@ package interceptor
 
 import (
 	"context"
-	"time"
-
-	"log"
-
+	"fmt"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"github.com/originbenntou/2929BE/shared/md"
+	"github.com/rs/xid"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 )
 
 func XTraceID() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler) (interface{}, error) {
-		//traceID := md.GetTraceIDFromContext(ctx)
-		//ctx = md.AddTraceIDToContext(ctx, traceID)
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		fmt.Println(ctx, xid.New().String())
+		traceID := md.GetTraceIDFromContext(ctx)
+		ctx = md.AddTraceIDToContext(ctx, traceID)
 		return handler(ctx, req)
 	}
 }
 
-const loggingFmt = "TraceID:%s\tFullMethod:%s\tElapsedTime:%s\tStatusCode:%s\tError:%s\n"
-
 func Logging() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler) (interface{}, error) {
-		start := time.Now()
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		h, err := handler(ctx, req)
-		var errMsg string
-		if err != nil {
-			errMsg = err.Error()
-		}
-		log.Printf(loggingFmt,
-			//md.GetTraceIDFromContext(ctx),
-			info.FullMethod,
-			time.Since(start),
-			status.Code(err), errMsg)
+		ctxzap.AddFields(ctx,
+			zap.String("TraceID", md.GetTraceIDFromContext(ctx)),
+		)
 		return h, err
 	}
 }
 
 func XUserID() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler) (interface{}, error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		//userID, err := md.SafeGetUserIDFromContext(ctx)
 		//if err != nil {
 		//	return nil, status.Error(codes.InvalidArgument, err.Error())
