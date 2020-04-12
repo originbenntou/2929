@@ -3,29 +3,25 @@ services:
   graphql:
     build:
       context: ./
-      # prd
-      # dockerfile: graphql/Dockerfile
-      # local
-      dockerfile: graphql/docker-local/Dockerfile
+      # dockerfile: graphql/Dockerfile #prd
+      dockerfile: graphql/docker-local/Dockerfile #local
     container_name: 2929graphql
     ports:
       - "8080:8080"
-    # local
     volumes:
-      - ./graphql:/go/src/github.com/originbenntou/2929BE/graphql
+      - ./graphql:/go/src/github.com/originbenntou/2929BE/graphql #local
   account:
     build:
       context: ./
-      # prd
-      # dockerfile: account/Dockerfile
-      # local
-      dockerfile: account/docker-local/Dockerfile
+      # dockerfile: account/Dockerfile #prd
+      dockerfile: account/docker-local/Dockerfile #local
     container_name: 2929account
     ports:
       - "50051:50051"
-    # local
+    environment:
+      - ENV=LOCAL #local
     volumes:
-      - ./account:/go/src/github.com/originbenntou/2929BE/account
+      - ./account:/go/src/github.com/originbenntou/2929BE/account #local
   mysql:
     build:
       context: ./

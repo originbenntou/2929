@@ -10,7 +10,7 @@ var Logger *zap.Logger
 
 func init() {
 	level := zap.NewAtomicLevel()
-	level.SetLevel(zapcore.DebugLevel)
+	level.SetLevel(zapcore.InfoLevel)
 
 	myConfig := zap.Config{
 		Level:    level,
@@ -21,14 +21,15 @@ func init() {
 			NameKey:        "Name",
 			CallerKey:      "Caller",
 			MessageKey:     "Msg",
-			StacktraceKey:  "St",
+			StacktraceKey:  "Stack",
 			EncodeLevel:    zapcore.CapitalLevelEncoder,
 			EncodeTime:     zapcore.ISO8601TimeEncoder,
 			EncodeDuration: zapcore.StringDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 		},
-		OutputPaths:      []string{"stdout"},
-		ErrorOutputPaths: []string{"stderr"},
+		Development:      true,
+		OutputPaths:      []string{"stdout", "/var/log/ap/ap.log"},
+		ErrorOutputPaths: []string{"stderr", "/var/log/ap/ap.log"},
 	}
 	var err error
 	Logger, err = myConfig.Build()

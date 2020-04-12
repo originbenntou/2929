@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	"github.com/originbenntou/2929BE/account/constant"
 	"github.com/originbenntou/2929BE/account/registry"
+	"github.com/originbenntou/2929BE/shared/interceptor"
+	"github.com/originbenntou/2929BE/shared/logger"
 	"github.com/originbenntou/2929BE/shared/mysql"
 	"log"
 	"net"
@@ -14,7 +17,6 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/grpc-ecosystem/go-grpc-middleware/validator"
-	"github.com/originbenntou/2929BE/shared/interceptor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -27,6 +29,7 @@ func main() {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_validator.UnaryServerInterceptor(),
 			interceptor.XTraceID(),
+			grpc_zap.UnaryServerInterceptor(logger.Logger),
 			interceptor.Logging(),
 		)),
 	)
