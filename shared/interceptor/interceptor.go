@@ -11,10 +11,7 @@ import (
 )
 
 func XTraceID() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler) (interface{}, error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		//traceID := md.GetTraceIDFromContext(ctx)
 		//ctx = md.AddTraceIDToContext(ctx, traceID)
 		return handler(ctx, req)
@@ -24,10 +21,7 @@ func XTraceID() grpc.UnaryServerInterceptor {
 const loggingFmt = "TraceID:%s\tFullMethod:%s\tElapsedTime:%s\tStatusCode:%s\tError:%s\n"
 
 func Logging() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler) (interface{}, error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		start := time.Now()
 		h, err := handler(ctx, req)
 		var errMsg string
@@ -36,6 +30,7 @@ func Logging() grpc.UnaryServerInterceptor {
 		}
 		log.Printf(loggingFmt,
 			//md.GetTraceIDFromContext(ctx),
+			"aaaa",
 			info.FullMethod,
 			time.Since(start),
 			status.Code(err), errMsg)
@@ -44,10 +39,7 @@ func Logging() grpc.UnaryServerInterceptor {
 }
 
 func XUserID() grpc.UnaryServerInterceptor {
-	return func(ctx context.Context,
-		req interface{},
-		info *grpc.UnaryServerInfo,
-		handler grpc.UnaryHandler) (interface{}, error) {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		//userID, err := md.SafeGetUserIDFromContext(ctx)
 		//if err != nil {
 		//	return nil, status.Error(codes.InvalidArgument, err.Error())

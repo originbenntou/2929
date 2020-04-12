@@ -1,12 +1,17 @@
 package mysql
 
 func CloseTransaction(tx TxManager, err error) error {
+	var txErr error
 	if recover() != nil {
-		err = tx.Rollback()
+		txErr = tx.Rollback()
 	} else if err != nil {
-		err = tx.Rollback()
+		txErr = tx.Rollback()
 	} else {
-		err = tx.Commit()
+		txErr = tx.Commit()
+	}
+
+	if txErr != nil {
+		err = txErr
 	}
 
 	return err

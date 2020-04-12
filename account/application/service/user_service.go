@@ -45,6 +45,9 @@ func (s userService) RegisterUser(ctx context.Context, pbReq *pbAccount.Register
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &pbAccount.RegisterUserResponse{
 		UserId: uid,

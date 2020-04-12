@@ -10,6 +10,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/mwitkow/go-proto-validators v0.3.0
 	github.com/vektah/gqlparser/v2 v2.0.1
+	go.uber.org/zap v1.14.1 // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	google.golang.org/grpc v1.28.0
 )
