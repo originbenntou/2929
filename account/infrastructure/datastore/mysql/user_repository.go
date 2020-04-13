@@ -20,7 +20,22 @@ func NewUserRepository(db mysql.DBManager) repository.UserRepository {
 }
 
 func (r userRepository) FindUserByEmail(ctx context.Context, email string) (u *model.User, err error) {
-	return nil, nil
+	var rows *sql.Rows
+	q := "SELECT * FROM user WHERE email = ?"
+	rows, err = r.db.QueryContext(ctx, q, email)
+	if err != nil {
+		return
+	}
+
+	u = &model.User{}
+	for rows.Next() {
+		if err = rows.Scan(&u.Id, &u.Email, &u.PassHash, &u.Name, &u.CompanyId, &u.CreatedAt, &u.UpdatedAt); err != nil {
+			return
+		}
+	}
+
+	// ユーザーが存在しない場合はIdゼロのUser構造体を返す
+	return
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uint64, err error) {
@@ -45,7 +60,8 @@ func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uin
 	}
 
 	defer func() {
-		if err = stmt.Close(); err != nil {
+		if stmtErr := stmt.Close(); stmtErr != nil {
+			err = stmtErr
 			return
 		}
 	}()

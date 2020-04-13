@@ -43,6 +43,7 @@ type (
 	Querier interface {
 		Query(query string, args ...interface{}) (*sql.Rows, error)
 		QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+		QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 	}
 
 	// Beginner is interface of Begin.
@@ -75,10 +76,6 @@ func (s *dbManager) ExecContext(ctx context.Context, query string, args ...inter
 func (s *dbManager) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	rows, err := s.Conn.Query(query, args...)
 	if err != nil {
-		//err = &model.SQLError{
-		//	BaseErr:                   err,
-		//	InvalidReasonForDeveloper: "failed to execute query",
-		//}
 		return nil, err
 	}
 
@@ -87,15 +84,16 @@ func (s *dbManager) Query(query string, args ...interface{}) (*sql.Rows, error) 
 
 // QueryContext executes query which return row with context.
 func (s *dbManager) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	rows, err := s.Conn.Query(query, args...)
+	rows, err := s.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
-		//err = &model.SQLError{
-		//	BaseErr:                   err,
-		//	InvalidReasonForDeveloper: "failed to execute query with context",
-		//}
 		return nil, err
 	}
 	return rows, nil
+}
+
+// QueryRowContext executes query which return row with context.
+func (s *dbManager) QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row {
+	return s.Conn.QueryRowContext(ctx, query, args...)
 }
 
 // Prepare prepares statement for Query and Exec later.

@@ -1,7 +1,7 @@
 DROP DATABASE IF EXISTS account;
 CREATE DATABASE account DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
 
-use account
+use account;
 
 DROP TABLE IF EXISTS user;
 CREATE TABLE user (
@@ -12,7 +12,9 @@ CREATE TABLE user (
   company_id INT unsigned  NOT NULL,
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY (email),
+  FOREIGN KEY (company_id) REFERENCES company(id)
 ) COMMENT 'ユーザー情報';
 
 DROP TABLE IF EXISTS company;
@@ -22,7 +24,8 @@ CREATE TABLE company (
   plan_id INT unsigned  NOT NULL,
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  FOREIGN KEY (plan_id) REFERENCES plan(id)
 ) COMMENT '会社情報';
 
 DROP TABLE IF EXISTS plan;

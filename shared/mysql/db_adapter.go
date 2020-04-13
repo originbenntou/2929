@@ -19,7 +19,7 @@ type Config interface {
 }
 
 func NewDBConnection(c Config) (*sql.DB, error) {
-	source := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", c.GetUser(), c.GetPassword(), c.GetHost(), c.GetPort(), c.GetDbname())
+	source := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", c.GetUser(), c.GetPassword(), c.GetHost(), c.GetPort(), c.GetDbname())
 	db, err := sql.Open("mysql", source)
 	if err != nil {
 		return nil, err
