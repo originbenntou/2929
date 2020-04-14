@@ -30,8 +30,8 @@ func (s userService) RegisterUser(ctx context.Context, pbReq *pbAccount.Register
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if user.Id != 0 {
-		return nil, status.Error(codes.AlreadyExists, errors.New("user already exist: "+user.GetEmail()).Error())
+	if user != nil {
+		return nil, status.Error(codes.AlreadyExists, errors.New("user already exist: "+pbReq.GetEmail()).Error())
 	}
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(pbReq.GetPassword()), bcrypt.DefaultCost)
