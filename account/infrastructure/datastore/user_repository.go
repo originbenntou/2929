@@ -1,4 +1,4 @@
-package mysql
+package datastore
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func NewUserRepository(db mysql.DBManager) repository.UserRepository {
 	return &userRepository{db}
 }
 
-func (r userRepository) FindUserByEmail(ctx context.Context, email string) (u *model.User, err error) {
+func (r userRepository) FindUserByEmail(ctx context.Context, email string) (m *model.User, err error) {
 	defer func() {
 		if err != nil {
 			logger.Common.Error(err.Error())
@@ -40,10 +40,10 @@ func (r userRepository) FindUserByEmail(ctx context.Context, email string) (u *m
 		return nil, nil
 	}
 
-	u = &model.User{}
+	m = &model.User{}
 	c := 0
 	for rows.Next() {
-		if err := rows.StructScan(u); err != nil {
+		if err := rows.StructScan(m); err != nil {
 			return nil, err
 		}
 		c++
@@ -54,7 +54,7 @@ func (r userRepository) FindUserByEmail(ctx context.Context, email string) (u *m
 	}
 
 	// one match record
-	return u, nil
+	return m, nil
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uint64, err error) {
@@ -85,8 +85,9 @@ func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uin
 		return InvalidID, err
 	}
 
-	if affect == 1 {
-		return InvalidID, errors.New(fmt.Sprintf("total affected: %d", affect))
+	if affect != 1 {
+		msg := fmt.Sprintf("total affected: %d", affect)
+		return InvalidID, errors.New(msg)
 	}
 
 	lid, err := result.LastInsertId()
