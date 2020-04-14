@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"github.com/originbenntou/2929BE/account/domain/model"
 	"github.com/originbenntou/2929BE/account/domain/repository"
 	"github.com/originbenntou/2929BE/shared/mysql"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type userRepository struct {
@@ -20,7 +22,36 @@ func NewUserRepository(db mysql.DBManager) repository.UserRepository {
 }
 
 func (r userRepository) FindUserByEmail(ctx context.Context, email string) (u *model.User, err error) {
-	return nil, nil
+	q := "SELECT * FROM user WHERE email = :email"
+
+	var rows *sqlx.Rows
+	rows, err = r.db.NamedQueryContext(ctx, q, map[string]interface{}{"email": email})
+	if err != nil {
+		return
+	}
+
+	// 0件はnilを返却
+	if !rows.Next() {
+		return
+	}
+
+	u = &model.User{}
+	c := 0
+	for rows.Next() {
+		if err = rows.StructScan(u); err != nil {
+			return
+		}
+		c++
+	}
+
+	// 2件以上はエラー
+	if c > 1 {
+		u = nil
+		err = errors.New("found user more than 1 by:" + email)
+		return
+	}
+
+	return
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uint64, err error) {
@@ -36,22 +67,10 @@ func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uin
 		}
 	}()
 
-	q := "INSERT INTO user(email, password, name, company_id, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?)"
-
-	var stmt *sql.Stmt
-	stmt, err = tx.PrepareContext(ctx, q)
-	if err != nil {
-		return
-	}
-
-	defer func() {
-		if err = stmt.Close(); err != nil {
-			return
-		}
-	}()
+	q := "INSERT INTO user (email, password, name, company_id, created_at, updated_at) VALUES (:email, :password, :name, :company_id, :created_at, :updated_at)"
 
 	var result sql.Result
-	result, err = stmt.ExecContext(ctx, req.Email, req.PassHash, req.Name, req.CompanyId, req.CreatedAt, req.UpdatedAt)
+	result, err = tx.NamedExecContext(ctx, q, req)
 	if err != nil {
 		return
 	}
@@ -63,7 +82,7 @@ func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uin
 	}
 
 	if affect != 1 {
-		err = errors.New(fmt.Sprintf("total affected: %d ", affect))
+		err = errors.New(fmt.Sprintf("total affected: %d", affect))
 		return
 	}
 

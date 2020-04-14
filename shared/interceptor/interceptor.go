@@ -2,17 +2,14 @@ package interceptor
 
 import (
 	"context"
-	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 	"github.com/originbenntou/2929BE/shared/md"
-	"github.com/rs/xid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 func XTraceID() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		fmt.Println(ctx, xid.New().String())
 		traceID := md.GetTraceIDFromContext(ctx)
 		ctx = md.AddTraceIDToContext(ctx, traceID)
 		return handler(ctx, req)
