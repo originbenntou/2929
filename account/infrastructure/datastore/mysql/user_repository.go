@@ -2,16 +2,16 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jmoiron/sqlx"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/originbenntou/2929BE/account/domain/model"
 	"github.com/originbenntou/2929BE/account/domain/repository"
+	"github.com/originbenntou/2929BE/shared/logger"
 	"github.com/originbenntou/2929BE/shared/mysql"
-
-	_ "github.com/go-sql-driver/mysql"
 )
+
+const InvalidID = 0
 
 type userRepository struct {
 	db mysql.DBManager
@@ -22,77 +22,77 @@ func NewUserRepository(db mysql.DBManager) repository.UserRepository {
 }
 
 func (r userRepository) FindUserByEmail(ctx context.Context, email string) (u *model.User, err error) {
+	defer func() {
+		if err != nil {
+			logger.Common.Error(err.Error())
+		}
+	}()
+
 	q := "SELECT * FROM user WHERE email = :email"
 
-	var rows *sqlx.Rows
-	rows, err = r.db.NamedQueryContext(ctx, q, map[string]interface{}{"email": email})
+	rows, err := r.db.NamedQueryContext(ctx, q, map[string]interface{}{"email": email})
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	// 0件はnilを返却
+	// no match record is ok
 	if !rows.Next() {
-		return
+		return nil, nil
 	}
 
 	u = &model.User{}
 	c := 0
 	for rows.Next() {
-		if err = rows.StructScan(u); err != nil {
-			return
+		if err := rows.StructScan(u); err != nil {
+			return nil, err
 		}
 		c++
 	}
 
-	// 2件以上はエラー
 	if c > 1 {
-		u = nil
-		err = errors.New("found user more than 1 by:" + email)
-		return
+		return nil, errors.New("found user more than 1 by: " + email)
 	}
 
-	return
+	// one match record
+	return u, nil
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uint64, err error) {
-	var tx mysql.TxManager
-	tx, err = r.db.Begin()
+	tx, err := r.db.Begin()
 	if err != nil {
-		return
+		return InvalidID, err
 	}
 
 	defer func() {
-		if err = mysql.CloseTransaction(tx, err); err != nil {
-			return
+		if err != nil {
+			logger.Common.Error(err.Error())
+		}
+
+		if txErr := tx.CloseTransaction(err); txErr != nil {
+			logger.Common.Error(txErr.Error())
 		}
 	}()
 
 	q := "INSERT INTO user (email, password, name, company_id, created_at, updated_at) VALUES (:email, :password, :name, :company_id, :created_at, :updated_at)"
 
-	var result sql.Result
-	result, err = tx.NamedExecContext(ctx, q, req)
+	result, err := tx.NamedExecContext(ctx, q, req)
 	if err != nil {
-		return
+		return 0, err
 	}
 
-	var affect int64
-	affect, err = result.RowsAffected()
+	affect, err := result.RowsAffected()
 	if err != nil {
-		return
+		return InvalidID, err
 	}
 
-	if affect != 1 {
-		err = errors.New(fmt.Sprintf("total affected: %d", affect))
-		return
+	if affect == 1 {
+		return InvalidID, errors.New(fmt.Sprintf("total affected: %d", affect))
 	}
 
-	var lid int64
-	lid, err = result.LastInsertId()
+	lid, err := result.LastInsertId()
 	if err != nil {
-		return
+		return InvalidID, err
 	}
 
-	id = uint64(lid)
-
-	return
+	return uint64(lid), nil
 }

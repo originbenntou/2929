@@ -6,15 +6,16 @@ import (
 )
 
 // Logger is Log object.
-var Logger *zap.Logger
+var Common *zap.Logger
+var Interceptor *zap.Logger
 
 func init() {
 	level := zap.NewAtomicLevel()
 	level.SetLevel(zapcore.InfoLevel)
 
-	myConfig := zap.Config{
+	cConfig := zap.Config{
 		Level:    level,
-		Encoding: "json",
+		Encoding: "console",
 		EncoderConfig: zapcore.EncoderConfig{
 			TimeKey:        "Time",
 			LevelKey:       "Level",
@@ -27,12 +28,33 @@ func init() {
 			EncodeDuration: zapcore.StringDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 		},
-		Development:      true,
 		OutputPaths:      []string{"stdout", "/var/log/ap/ap.log"},
 		ErrorOutputPaths: []string{"stderr", "/var/log/ap/ap.log"},
 	}
+
+	iConfig := zap.Config{
+		Level:    level,
+		Encoding: "console",
+		EncoderConfig: zapcore.EncoderConfig{
+			TimeKey:        "Time",
+			LevelKey:       "Level",
+			NameKey:        "Name",
+			MessageKey:     "Msg",
+			EncodeLevel:    zapcore.CapitalLevelEncoder,
+			EncodeTime:     zapcore.ISO8601TimeEncoder,
+			EncodeDuration: zapcore.StringDurationEncoder,
+		},
+		OutputPaths:      []string{"stdout", "/var/log/ap/ap.log"},
+		ErrorOutputPaths: []string{"stderr", "/var/log/ap/ap.log"},
+	}
+
 	var err error
-	Logger, err = myConfig.Build()
+	Common, err = cConfig.Build()
+	if err != nil {
+		panic(err)
+	}
+
+	Interceptor, err = iConfig.Build()
 	if err != nil {
 		panic(err)
 	}

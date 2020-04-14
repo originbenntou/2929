@@ -3,9 +3,8 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"github.com/jmoiron/sqlx"
-
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 )
 
 // TxManager is the manager of Tx.
@@ -13,6 +12,7 @@ type TxManager interface {
 	Executor
 	Commit() error
 	Rollback() error
+	CloseTransaction(err error) error
 }
 
 // txManager is the manager of Tx.
@@ -38,19 +38,12 @@ func (s *txManager) Rollback() error {
 
 // Close Tx
 // Don't write panic() not to stop server
-func CloseTransaction(tx TxManager, err error) error {
-	var txErr error
+func (s *txManager) CloseTransaction(err error) error {
 	if recover() != nil {
-		txErr = tx.Rollback()
+		return s.Rollback()
 	} else if err != nil {
-		txErr = tx.Rollback()
+		return s.Rollback()
 	} else {
-		txErr = tx.Commit()
+		return s.Commit()
 	}
-
-	if txErr != nil {
-		err = txErr
-	}
-
-	return err
 }

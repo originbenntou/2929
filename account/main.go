@@ -29,7 +29,7 @@ func main() {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_validator.UnaryServerInterceptor(),
 			interceptor.XTraceID(),
-			grpc_zap.UnaryServerInterceptor(logger.Logger),
+			grpc_zap.UnaryServerInterceptor(logger.Interceptor),
 			interceptor.Logging(),
 		)),
 	)
