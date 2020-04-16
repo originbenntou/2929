@@ -1,7 +1,7 @@
 FROM golang:1.14.0 as builder
 
 ENV WORK_DIR /go/src/github.com/originbenntou/2929BE
-ENV MAIN_PATH $WORK_DIR/graphql
+ENV MAIN_PATH $WORK_DIR/gateway
 
 WORKDIR $WORK_DIR
 
@@ -16,6 +16,6 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install $MAIN_PATH
 
 FROM alpine:latest
 ENV TZ Asia/Tokyo
-COPY --from=builder /go/bin/graphql /go/bin/graphql
+COPY --from=builder /go/bin/gateway /go/bin/gateway
 
-ENTRYPOINT ["/go/bin/graphql"]
+ENTRYPOINT ["/go/bin/gateway"]

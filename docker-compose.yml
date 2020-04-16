@@ -1,15 +1,15 @@
 version: '3'
 services:
-  graphql:
+  gateway:
     build:
       context: ./
-      # dockerfile: graphql/Dockerfile #prd
-      dockerfile: graphql/docker-local/Dockerfile #local
-    container_name: 2929graphql
+      # dockerfile: gateway/Dockerfile #prd
+      dockerfile: gateway/docker-local/Dockerfile #local
+    container_name: 2929gateway
     ports:
       - "8080:8080"
     volumes:
-      - ./graphql:/go/src/github.com/originbenntou/2929BE/graphql #local
+      - ./gateway:/go/src/github.com/originbenntou/2929BE/gateway #local
   account:
     build:
       context: ./
@@ -30,7 +30,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: account
+      MYSQL_DATABASE: account, trend
       MYSQL_USER: 2929
       MYSQL_PASSWORD: 2929
     ports:

@@ -12,7 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/originbenntou/2929BE/graphql/graph/model"
+	"github.com/originbenntou/2929BE/gateway/graph/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -324,7 +324,7 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	args := map[string]interface{}{}
 	var arg0 model.User
 	if tmp, ok := rawArgs["user"]; ok {
-		arg0, err = ec.unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, tmp)
+		arg0, err = ec.unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -366,7 +366,7 @@ func (ec *executionContext) field_Query_verifyUser_args(ctx context.Context, raw
 	args := map[string]interface{}{}
 	var arg0 model.User
 	if tmp, ok := rawArgs["user"]; ok {
-		arg0, err = ec.unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐUser(ctx, tmp)
+		arg0, err = ec.unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐUser(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -476,7 +476,7 @@ func (ec *executionContext) _ChildSuggest_growth(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.Growth)
 	fc.Result = res
-	return ec.marshalNGrowth2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGrowth(ctx, field.Selections, res)
+	return ec.marshalNGrowth2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGrowth(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _ChildSuggest_graphs(ctx context.Context, field graphql.CollectedField, obj *model.ChildSuggest) (ret graphql.Marshaler) {
@@ -510,7 +510,7 @@ func (ec *executionContext) _ChildSuggest_graphs(ctx context.Context, field grap
 	}
 	res := resTmp.([]*model.Graph)
 	fc.Result = res
-	return ec.marshalNGraph2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGraphᚄ(ctx, field.Selections, res)
+	return ec.marshalNGraph2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGraphᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Graph_date(ctx context.Context, field graphql.CollectedField, obj *model.Graph) (ret graphql.Marshaler) {
@@ -612,7 +612,7 @@ func (ec *executionContext) _Growth_short(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(model.Arrow)
 	fc.Result = res
-	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
+	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Growth_midium(ctx context.Context, field graphql.CollectedField, obj *model.Growth) (ret graphql.Marshaler) {
@@ -646,7 +646,7 @@ func (ec *executionContext) _Growth_midium(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(model.Arrow)
 	fc.Result = res
-	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
+	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Growth_long(ctx context.Context, field graphql.CollectedField, obj *model.Growth) (ret graphql.Marshaler) {
@@ -680,7 +680,7 @@ func (ec *executionContext) _Growth_long(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(model.Arrow)
 	fc.Result = res
-	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
+	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -803,7 +803,7 @@ func (ec *executionContext) _Query_findTrend(ctx context.Context, field graphql.
 	}
 	res := resTmp.([]*model.Suggest)
 	fc.Result = res
-	return ec.marshalNSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐSuggestᚄ(ctx, field.Selections, res)
+	return ec.marshalNSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐSuggestᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -940,7 +940,7 @@ func (ec *executionContext) _Suggest_childSuggests(ctx context.Context, field gr
 	}
 	res := resTmp.([]*model.ChildSuggest)
 	fc.Result = res
-	return ec.marshalNChildSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐChildSuggestᚄ(ctx, field.Selections, res)
+	return ec.marshalNChildSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐChildSuggestᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2502,12 +2502,12 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐArrow(ctx context.Context, v interface{}) (model.Arrow, error) {
+func (ec *executionContext) unmarshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐArrow(ctx context.Context, v interface{}) (model.Arrow, error) {
 	var res model.Arrow
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐArrow(ctx context.Context, sel ast.SelectionSet, v model.Arrow) graphql.Marshaler {
+func (ec *executionContext) marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐArrow(ctx context.Context, sel ast.SelectionSet, v model.Arrow) graphql.Marshaler {
 	return v
 }
 
@@ -2525,11 +2525,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNChildSuggest2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐChildSuggest(ctx context.Context, sel ast.SelectionSet, v model.ChildSuggest) graphql.Marshaler {
+func (ec *executionContext) marshalNChildSuggest2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐChildSuggest(ctx context.Context, sel ast.SelectionSet, v model.ChildSuggest) graphql.Marshaler {
 	return ec._ChildSuggest(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChildSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐChildSuggestᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ChildSuggest) graphql.Marshaler {
+func (ec *executionContext) marshalNChildSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐChildSuggestᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ChildSuggest) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2553,7 +2553,7 @@ func (ec *executionContext) marshalNChildSuggest2ᚕᚖgithubᚗcomᚋoriginbenn
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNChildSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐChildSuggest(ctx, sel, v[i])
+			ret[i] = ec.marshalNChildSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐChildSuggest(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2566,7 +2566,7 @@ func (ec *executionContext) marshalNChildSuggest2ᚕᚖgithubᚗcomᚋoriginbenn
 	return ret
 }
 
-func (ec *executionContext) marshalNChildSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐChildSuggest(ctx context.Context, sel ast.SelectionSet, v *model.ChildSuggest) graphql.Marshaler {
+func (ec *executionContext) marshalNChildSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐChildSuggest(ctx context.Context, sel ast.SelectionSet, v *model.ChildSuggest) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2604,11 +2604,11 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNGraph2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGraph(ctx context.Context, sel ast.SelectionSet, v model.Graph) graphql.Marshaler {
+func (ec *executionContext) marshalNGraph2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGraph(ctx context.Context, sel ast.SelectionSet, v model.Graph) graphql.Marshaler {
 	return ec._Graph(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGraph2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGraphᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Graph) graphql.Marshaler {
+func (ec *executionContext) marshalNGraph2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGraphᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Graph) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2632,7 +2632,7 @@ func (ec *executionContext) marshalNGraph2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNGraph2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGraph(ctx, sel, v[i])
+			ret[i] = ec.marshalNGraph2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGraph(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2645,7 +2645,7 @@ func (ec *executionContext) marshalNGraph2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2
 	return ret
 }
 
-func (ec *executionContext) marshalNGraph2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGraph(ctx context.Context, sel ast.SelectionSet, v *model.Graph) graphql.Marshaler {
+func (ec *executionContext) marshalNGraph2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGraph(ctx context.Context, sel ast.SelectionSet, v *model.Graph) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2655,11 +2655,11 @@ func (ec *executionContext) marshalNGraph2ᚖgithubᚗcomᚋoriginbenntouᚋ2929
 	return ec._Graph(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGrowth2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGrowth(ctx context.Context, sel ast.SelectionSet, v model.Growth) graphql.Marshaler {
+func (ec *executionContext) marshalNGrowth2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGrowth(ctx context.Context, sel ast.SelectionSet, v model.Growth) graphql.Marshaler {
 	return ec._Growth(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGrowth2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐGrowth(ctx context.Context, sel ast.SelectionSet, v *model.Growth) graphql.Marshaler {
+func (ec *executionContext) marshalNGrowth2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐGrowth(ctx context.Context, sel ast.SelectionSet, v *model.Growth) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2683,11 +2683,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNSuggest2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐSuggest(ctx context.Context, sel ast.SelectionSet, v model.Suggest) graphql.Marshaler {
+func (ec *executionContext) marshalNSuggest2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐSuggest(ctx context.Context, sel ast.SelectionSet, v model.Suggest) graphql.Marshaler {
 	return ec._Suggest(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐSuggestᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Suggest) graphql.Marshaler {
+func (ec *executionContext) marshalNSuggest2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐSuggestᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Suggest) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2711,7 +2711,7 @@ func (ec *executionContext) marshalNSuggest2ᚕᚖgithubᚗcomᚋoriginbenntou�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐSuggest(ctx, sel, v[i])
+			ret[i] = ec.marshalNSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐSuggest(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2724,7 +2724,7 @@ func (ec *executionContext) marshalNSuggest2ᚕᚖgithubᚗcomᚋoriginbenntou�
 	return ret
 }
 
-func (ec *executionContext) marshalNSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐSuggest(ctx context.Context, sel ast.SelectionSet, v *model.Suggest) graphql.Marshaler {
+func (ec *executionContext) marshalNSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐSuggest(ctx context.Context, sel ast.SelectionSet, v *model.Suggest) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2734,7 +2734,7 @@ func (ec *executionContext) marshalNSuggest2ᚖgithubᚗcomᚋoriginbenntouᚋ29
 	return ec._Suggest(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgraphqlᚋgraphᚋmodelᚐUser(ctx context.Context, v interface{}) (model.User, error) {
+func (ec *executionContext) unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐUser(ctx context.Context, v interface{}) (model.User, error) {
 	return ec.unmarshalInputUser(ctx, v)
 }
 
