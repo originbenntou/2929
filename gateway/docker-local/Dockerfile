@@ -1,7 +1,7 @@
 FROM golang:1.14.0
 
 ENV WORK_DIR /go/src/github.com/originbenntou/2929BE
-ENV MAIN_PATH $WORK_DIR/graphql
+ENV MAIN_PATH $WORK_DIR/gateway
 
 WORKDIR $WORK_DIR
 

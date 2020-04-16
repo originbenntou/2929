@@ -10,8 +10,8 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/originbenntou/2929BE/graphql/graph/generated"
-	"github.com/originbenntou/2929BE/graphql/graph/model"
+	"github.com/originbenntou/2929BE/gateway/graph/generated"
+	"github.com/originbenntou/2929BE/gateway/graph/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -51,6 +51,8 @@ func (r *mutationResolver) CreateUser(ctx context.Context, user model.User) (boo
 }
 
 func (r *queryResolver) VerifyUser(ctx context.Context, user model.User) (bool, error) {
+	return false, nil
+
 	db, err := sql.Open("mysql", "2929:2929@tcp(2929mysql:3306)/account")
 	if err != nil {
 		return false, err

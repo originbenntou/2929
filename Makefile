@@ -4,5 +4,5 @@ gen_proto:
 
 # graphql生成
 gen_graph:
-	cd ./graphql
+	cd ./gateway
 	go run github.com/99designs/gqlgen generate
