@@ -29,7 +29,7 @@ func main() {
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_validator.UnaryServerInterceptor(),
 			interceptor.XTraceID(),
-			grpc_zap.UnaryServerInterceptor(logger.Logger),
+			grpc_zap.UnaryServerInterceptor(logger.Interceptor),
 			interceptor.Logging(),
 		)),
 	)
@@ -38,11 +38,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect database: %s", err)
 	}
+	db := mysql.NewDBManager(conn)
 
-	// DB操作をラップ
-	m := mysql.NewDBManager(conn)
-
-	registry.NewRegistry(srv, m).Register()
+	registry.NewRegistry(srv, db).Register()
+	// server reflection
 	reflection.Register(srv)
 
 	go func() {
