@@ -1,6 +1,10 @@
+# v0.0.1a
+
 type Query {
-  verifyUser(user: User!): Boolean!
-  findTrend(word: String!): [Suggest!]!
+  verifyUser(user: User!): String! # ログインTokenを返却
+  trendSearch(word: String!): Int! # SuggestテーブルIDを返却 => 検索履歴欄にてkeywordと組み合わせて保持
+  trendHistory: [History]! # ユーザーIDに紐づく検索履歴を返却 => ユーザー認証はCookie内のTokenで行う/履歴がない場合は空配列が返る（日時更新）
+  trendSuggest(suggestId: Int!): [Suggest!]!
 }
 
 type Mutation {
@@ -10,6 +14,16 @@ type Mutation {
 input User {
   email: String!
   password: String!
+}
+
+type History {
+  suggestId: Int!
+  status: Progress!
+}
+
+enum Progress {
+  INPROGRESS
+  COMPLETED
 }
 
 type Suggest {
