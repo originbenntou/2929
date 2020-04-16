@@ -2,7 +2,7 @@
 
 type Query {
   verifyUser(user: User!): String!
-  trendSearch(word: String!): Int!
+  trendSearch(keyword: String!): Int!
   trendHistory: [History]!
   trendSuggest(suggestId: Int!): [Suggest!]!
 }
@@ -27,7 +27,7 @@ enum Progress {
 }
 
 type Suggest {
-  word: String!
+  keyword: String!
   childSuggests: [ChildSuggest!]!
 }
 
