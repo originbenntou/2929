@@ -73,7 +73,7 @@ type ComplexityRoot struct {
 		TrendHistory func(childComplexity int) int
 		TrendSearch  func(childComplexity int, keyword string) int
 		TrendSuggest func(childComplexity int, suggestID int) int
-		VerifyUser   func(childComplexity int, user model.User) int
+		VerifyUser   func(childComplexity int, email string, password string) int
 	}
 
 	Suggest struct {
@@ -86,7 +86,7 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, user model.User) (bool, error)
 }
 type QueryResolver interface {
-	VerifyUser(ctx context.Context, user model.User) (string, error)
+	VerifyUser(ctx context.Context, email string, password string) (string, error)
 	TrendSearch(ctx context.Context, keyword string) (int, error)
 	TrendHistory(ctx context.Context) ([]*model.History, error)
 	TrendSuggest(ctx context.Context, suggestID int) ([]*model.Suggest, error)
@@ -230,7 +230,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.VerifyUser(childComplexity, args["user"].(model.User)), true
+		return e.complexity.Query.VerifyUser(childComplexity, args["email"].(string), args["password"].(string)), true
 
 	case "Suggest.childSuggests":
 		if e.complexity.Suggest.ChildSuggests == nil {
@@ -313,7 +313,7 @@ var sources = []*ast.Source{
 	&ast.Source{Name: "graph/schema.graphql", Input: `# v0.0.1a
 
 type Query {
-  verifyUser(user: User!): String!
+  verifyUser(email: String!, password: String!): String!
   trendSearch(keyword: String!): Int!
   trendHistory: [History]!
   trendSuggest(suggestId: Int!): [Suggest!]!
@@ -326,6 +326,8 @@ type Mutation {
 input User {
   email: String!
   password: String!
+  name: String!
+  companyId: Int!
 }
 
 type History {
@@ -434,14 +436,22 @@ func (ec *executionContext) field_Query_trendSuggest_args(ctx context.Context, r
 func (ec *executionContext) field_Query_verifyUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.User
-	if tmp, ok := rawArgs["user"]; ok {
-		arg0, err = ec.unmarshalNUser2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐUser(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["user"] = arg0
+	args["email"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["password"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["password"] = arg1
 	return args, nil
 }
 
@@ -886,7 +896,7 @@ func (ec *executionContext) _Query_verifyUser(ctx context.Context, field graphql
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().VerifyUser(rctx, args["user"].(model.User))
+		return ec.resolvers.Query().VerifyUser(rctx, args["email"].(string), args["password"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2226,6 +2236,18 @@ func (ec *executionContext) unmarshalInputUser(ctx context.Context, obj interfac
 		case "password":
 			var err error
 			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "companyId":
+			var err error
+			it.CompanyID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}

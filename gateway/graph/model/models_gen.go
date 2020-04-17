@@ -36,8 +36,10 @@ type Suggest struct {
 }
 
 type User struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Name      string `json:"name"`
+	CompanyID int    `json:"companyId"`
 }
 
 type Arrow string

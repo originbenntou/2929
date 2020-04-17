@@ -1,20 +1,36 @@
 # v0.0.1a
 
 type Query {
-  verifyUser(user: User!): String!
+  """ アカウントAPI """
+  loginUser(email: String!, password: String!): String!
+
+  """ トレンドAPI """
   trendSearch(keyword: String!): Int!
   trendHistory: [History]!
   trendSuggest(suggestId: Int!): [Suggest!]!
 }
 
 type Mutation {
-  createUser(user: User!): Boolean!
+  """ アカウントAPI """
+  registerUser(user: User!): Boolean!
+  updateUser(user: User!): Boolean!
+  deleteUser(user: User!): Boolean!
 }
+
+"""
+アカウント用構造体
+"""
 
 input User {
   email: String!
   password: String!
+  name: String!
+  companyId: Int!
 }
+
+"""
+トレンド用構造体
+"""
 
 type History {
   suggestId: Int!
