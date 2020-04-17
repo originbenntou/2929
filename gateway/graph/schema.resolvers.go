@@ -13,22 +13,20 @@ import (
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 )
 
-func (r *mutationResolver) CreateUser(ctx context.Context, user model.User) (bool, error) {
-	pbUser, err := r.userClient.RegisterUser(ctx, &pbAccount.RegisterUserRequest{
-		Email:     user.Email,
-		Password:  user.Password,
-		Name:      "",
-		CompanyId: 0,
-	})
-	if err != nil {
-		//logger.Common.Error(err.Error())
-	}
-
-	return pbUser.UserId > 0, nil
+func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) VerifyUser(ctx context.Context, email string, password string) (string, error) {
-	return "", nil
+func (r *mutationResolver) UpdateUser(ctx context.Context, user model.User) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteUser(ctx context.Context, user model.User) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) LoginUser(ctx context.Context, email string, password string) (string, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) TrendSearch(ctx context.Context, keyword string) (int, error) {
@@ -265,3 +263,26 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) CreateUser(ctx context.Context, user model.User) (bool, error) {
+	pbUser, err := r.userClient.RegisterUser(ctx, &pbAccount.RegisterUserRequest{
+		Email:     user.Email,
+		Password:  user.Password,
+		Name:      "",
+		CompanyId: 0,
+	})
+	if err != nil {
+		//logger.Common.Error(err.Error())
+	}
+
+	return pbUser.UserId > 0, nil
+}
+func (r *queryResolver) VerifyUser(ctx context.Context, email string, password string) (string, error) {
+	return "", nil
+}
