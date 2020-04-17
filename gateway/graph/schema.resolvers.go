@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -50,43 +51,70 @@ func (r *mutationResolver) CreateUser(ctx context.Context, user model.User) (boo
 	return true, nil
 }
 
-func (r *queryResolver) VerifyUser(ctx context.Context, user model.User) (bool, error) {
-	return false, nil
+func (r *queryResolver) VerifyUser(ctx context.Context, user model.User) (string, error) {
+	return "", nil
 
 	db, err := sql.Open("mysql", "2929:2929@tcp(2929mysql:3306)/account")
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECT password FROM user WHERE email = ?", user.Email)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	defer rows.Close()
 
 	var m model.User
 	for rows.Next() {
 		if err := rows.Scan(&m.Password); err != nil {
-			return false, err
+			return "", err
 		}
 	}
 
 	if err = rows.Err(); err != nil {
-		return false, err
+		return "", err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(m.Password), []byte(user.Password)); err != nil {
-		return false, err
+		return "", err
 	}
 
-	return true, nil
+	return "fire!", nil
 }
 
+func (r *queryResolver) TrendSearch(ctx context.Context, keyword string) (int, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) TrendHistory(ctx context.Context) ([]*model.History, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) TrendSuggest(ctx context.Context, suggestID int) ([]*model.Suggest, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query returns generated.QueryResolver implementation.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+
+type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
 func (r *queryResolver) FindTrend(ctx context.Context, word string) ([]*model.Suggest, error) {
 	return []*model.Suggest{
 		{
-			Word: "リモート",
+			Keyword: "リモート",
 			ChildSuggests: []*model.ChildSuggest{
 				{
 					Word: "Zoom",
@@ -157,7 +185,7 @@ func (r *queryResolver) FindTrend(ctx context.Context, word string) ([]*model.Su
 			},
 		},
 		{
-			Word: "フリーランス",
+			Keyword: "フリーランス",
 			ChildSuggests: []*model.ChildSuggest{
 				{
 					Word: "保証",
@@ -228,7 +256,7 @@ func (r *queryResolver) FindTrend(ctx context.Context, word string) ([]*model.Su
 			},
 		},
 		{
-			Word: "予防",
+			Keyword: "予防",
 			ChildSuggests: []*model.ChildSuggest{
 				{
 					Word: "手洗い",
@@ -300,12 +328,3 @@ func (r *queryResolver) FindTrend(ctx context.Context, word string) ([]*model.Su
 		},
 	}, nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

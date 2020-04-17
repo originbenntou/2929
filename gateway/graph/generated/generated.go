@@ -60,18 +60,25 @@ type ComplexityRoot struct {
 		Short  func(childComplexity int) int
 	}
 
+	History struct {
+		Status    func(childComplexity int) int
+		SuggestID func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateUser func(childComplexity int, user model.User) int
 	}
 
 	Query struct {
-		FindTrend  func(childComplexity int, word string) int
-		VerifyUser func(childComplexity int, user model.User) int
+		TrendHistory func(childComplexity int) int
+		TrendSearch  func(childComplexity int, keyword string) int
+		TrendSuggest func(childComplexity int, suggestID int) int
+		VerifyUser   func(childComplexity int, user model.User) int
 	}
 
 	Suggest struct {
 		ChildSuggests func(childComplexity int) int
-		Word          func(childComplexity int) int
+		Keyword       func(childComplexity int) int
 	}
 }
 
@@ -79,8 +86,10 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, user model.User) (bool, error)
 }
 type QueryResolver interface {
-	VerifyUser(ctx context.Context, user model.User) (bool, error)
-	FindTrend(ctx context.Context, word string) ([]*model.Suggest, error)
+	VerifyUser(ctx context.Context, user model.User) (string, error)
+	TrendSearch(ctx context.Context, keyword string) (int, error)
+	TrendHistory(ctx context.Context) ([]*model.History, error)
+	TrendSuggest(ctx context.Context, suggestID int) ([]*model.Suggest, error)
 }
 
 type executableSchema struct {
@@ -154,6 +163,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Growth.Short(childComplexity), true
 
+	case "History.status":
+		if e.complexity.History.Status == nil {
+			break
+		}
+
+		return e.complexity.History.Status(childComplexity), true
+
+	case "History.suggestId":
+		if e.complexity.History.SuggestID == nil {
+			break
+		}
+
+		return e.complexity.History.SuggestID(childComplexity), true
+
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
 			break
@@ -166,17 +189,36 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["user"].(model.User)), true
 
-	case "Query.findTrend":
-		if e.complexity.Query.FindTrend == nil {
+	case "Query.trendHistory":
+		if e.complexity.Query.TrendHistory == nil {
 			break
 		}
 
-		args, err := ec.field_Query_findTrend_args(context.TODO(), rawArgs)
+		return e.complexity.Query.TrendHistory(childComplexity), true
+
+	case "Query.trendSearch":
+		if e.complexity.Query.TrendSearch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_trendSearch_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.FindTrend(childComplexity, args["word"].(string)), true
+		return e.complexity.Query.TrendSearch(childComplexity, args["keyword"].(string)), true
+
+	case "Query.trendSuggest":
+		if e.complexity.Query.TrendSuggest == nil {
+			break
+		}
+
+		args, err := ec.field_Query_trendSuggest_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.TrendSuggest(childComplexity, args["suggestId"].(int)), true
 
 	case "Query.verifyUser":
 		if e.complexity.Query.VerifyUser == nil {
@@ -197,12 +239,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Suggest.ChildSuggests(childComplexity), true
 
-	case "Suggest.word":
-		if e.complexity.Suggest.Word == nil {
+	case "Suggest.keyword":
+		if e.complexity.Suggest.Keyword == nil {
 			break
 		}
 
-		return e.complexity.Suggest.Word(childComplexity), true
+		return e.complexity.Suggest.Keyword(childComplexity), true
 
 	}
 	return 0, false
@@ -268,9 +310,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "graph/schema.graphqls", Input: `type Query {
-  verifyUser(user: User!): Boolean!
-  findTrend(word: String!): [Suggest!]!
+	&ast.Source{Name: "graph/schema.graphql", Input: `# v0.0.1a
+
+type Query {
+  verifyUser(user: User!): String!
+  trendSearch(keyword: String!): Int!
+  trendHistory: [History]!
+  trendSuggest(suggestId: Int!): [Suggest!]!
 }
 
 type Mutation {
@@ -282,8 +328,18 @@ input User {
   password: String!
 }
 
+type History {
+  suggestId: Int!
+  status: Progress!
+}
+
+enum Progress {
+  INPROGRESS
+  COMPLETED
+}
+
 type Suggest {
-  word: String!
+  keyword: String!
   childSuggests: [ChildSuggest!]!
 }
 
@@ -347,17 +403,31 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_findTrend_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_trendSearch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["word"]; ok {
+	if tmp, ok := rawArgs["keyword"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["word"] = arg0
+	args["keyword"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_trendSuggest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["suggestId"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["suggestId"] = arg0
 	return args, nil
 }
 
@@ -683,6 +753,74 @@ func (ec *executionContext) _Growth_long(ctx context.Context, field graphql.Coll
 	return ec.marshalNArrow2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐArrow(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _History_suggestId(ctx context.Context, field graphql.CollectedField, obj *model.History) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "History",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SuggestID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _History_status(ctx context.Context, field graphql.CollectedField, obj *model.History) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "History",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.Progress)
+	fc.Result = res
+	return ec.marshalNProgress2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐProgress(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -760,12 +898,12 @@ func (ec *executionContext) _Query_verifyUser(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_findTrend(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_trendSearch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -781,7 +919,7 @@ func (ec *executionContext) _Query_findTrend(ctx context.Context, field graphql.
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_findTrend_args(ctx, rawArgs)
+	args, err := ec.field_Query_trendSearch_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -789,7 +927,82 @@ func (ec *executionContext) _Query_findTrend(ctx context.Context, field graphql.
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().FindTrend(rctx, args["word"].(string))
+		return ec.resolvers.Query().TrendSearch(rctx, args["keyword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_trendHistory(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TrendHistory(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.History)
+	fc.Result = res
+	return ec.marshalNHistory2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐHistory(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_trendSuggest(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_trendSuggest_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TrendSuggest(rctx, args["suggestId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -875,7 +1088,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Suggest_word(ctx context.Context, field graphql.CollectedField, obj *model.Suggest) (ret graphql.Marshaler) {
+func (ec *executionContext) _Suggest_keyword(ctx context.Context, field graphql.CollectedField, obj *model.Suggest) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -892,7 +1105,7 @@ func (ec *executionContext) _Suggest_word(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Word, nil
+		return obj.Keyword, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2136,6 +2349,38 @@ func (ec *executionContext) _Growth(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var historyImplementors = []string{"History"}
+
+func (ec *executionContext) _History(ctx context.Context, sel ast.SelectionSet, obj *model.History) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, historyImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("History")
+		case "suggestId":
+			out.Values[i] = ec._History_suggestId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "status":
+			out.Values[i] = ec._History_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2196,7 +2441,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "findTrend":
+		case "trendSearch":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2204,7 +2449,35 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_findTrend(ctx, field)
+				res = ec._Query_trendSearch(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "trendHistory":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_trendHistory(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "trendSuggest":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_trendSuggest(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2236,8 +2509,8 @@ func (ec *executionContext) _Suggest(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Suggest")
-		case "word":
-			out.Values[i] = ec._Suggest_word(ctx, field, obj)
+		case "keyword":
+			out.Values[i] = ec._Suggest_keyword(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2669,6 +2942,66 @@ func (ec *executionContext) marshalNGrowth2ᚖgithubᚗcomᚋoriginbenntouᚋ292
 	return ec._Growth(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNHistory2ᚕᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐHistory(ctx context.Context, sel ast.SelectionSet, v []*model.History) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOHistory2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐHistory(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNProgress2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐProgress(ctx context.Context, v interface{}) (model.Progress, error) {
+	var res model.Progress
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNProgress2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐProgress(ctx context.Context, sel ast.SelectionSet, v model.Progress) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2985,6 +3318,17 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOHistory2githubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐHistory(ctx context.Context, sel ast.SelectionSet, v model.History) graphql.Marshaler {
+	return ec._History(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOHistory2ᚖgithubᚗcomᚋoriginbenntouᚋ2929BEᚋgatewayᚋgraphᚋmodelᚐHistory(ctx context.Context, sel ast.SelectionSet, v *model.History) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._History(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

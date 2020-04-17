@@ -25,8 +25,13 @@ type Growth struct {
 	Long   Arrow `json:"long"`
 }
 
+type History struct {
+	SuggestID int      `json:"suggestId"`
+	Status    Progress `json:"status"`
+}
+
 type Suggest struct {
-	Word          string          `json:"word"`
+	Keyword       string          `json:"keyword"`
 	ChildSuggests []*ChildSuggest `json:"childSuggests"`
 }
 
@@ -75,5 +80,46 @@ func (e *Arrow) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Arrow) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type Progress string
+
+const (
+	ProgressInprogress Progress = "INPROGRESS"
+	ProgressCompleted  Progress = "COMPLETED"
+)
+
+var AllProgress = []Progress{
+	ProgressInprogress,
+	ProgressCompleted,
+}
+
+func (e Progress) IsValid() bool {
+	switch e {
+	case ProgressInprogress, ProgressCompleted:
+		return true
+	}
+	return false
+}
+
+func (e Progress) String() string {
+	return string(e)
+}
+
+func (e *Progress) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Progress(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Progress", str)
+	}
+	return nil
+}
+
+func (e Progress) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
