@@ -13,7 +13,7 @@ import (
 )
 
 func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (bool, error) {
-	pbUser, err := r.userClient.RegisterUser(ctx, &pbAccount.RegisterUserRequest{
+	pbUser, err := r.accountClient.RegisterUser(ctx, &pbAccount.RegisterUserRequest{
 		Email:     user.Email,
 		Password:  user.Password,
 		Name:      user.Name,
