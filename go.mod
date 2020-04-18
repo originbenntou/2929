@@ -6,6 +6,8 @@ require (
 	github.com/99designs/gqlgen v0.11.3
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.3.5
+	github.com/google/uuid v1.1.1
+	github.com/gorilla/mux v1.6.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/mwitkow/go-proto-validators v0.3.0

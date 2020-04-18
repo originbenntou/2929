@@ -1,10 +1,9 @@
 package account
 
 import (
-	"context"
 	"github.com/originbenntou/2929BE/gateway/grpc/client"
+	"github.com/originbenntou/2929BE/gateway/interfaces/interceptor"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
-	"google.golang.org/grpc"
 	"os"
 )
 
@@ -18,12 +17,6 @@ type Resolver struct {
 
 func NewAccountResolver() *Resolver {
 	return &Resolver{
-		accountClient: pbAccount.NewUserServiceClient(client.GetGrpcConn(os.Getenv("ACCOUNT_ADDR"), xTraceID)),
+		accountClient: pbAccount.NewUserServiceClient(client.GetGrpcConn(os.Getenv("ACCOUNT_ADDR"), interceptor.XTraceID)),
 	}
-}
-
-func xTraceID(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	//traceID := support.GetTraceIDFromContext(ctx)
-	//ctx = md.AddTraceIDToContext(ctx, traceID)
-	return invoker(ctx, method, req, reply, cc, opts...)
 }
