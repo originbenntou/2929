@@ -17,7 +17,6 @@ func GetUserFromContext(ctx context.Context) *pbAccount.User {
 	return pUser
 }
 
-func AddUserToContext(ctx context.Context,
-	user *pbAccount.User) context.Context {
+func AddUserToContext(ctx context.Context, user *pbAccount.User) context.Context {
 	return context.WithValue(ctx, contextKeyUser{}, user)
 }
