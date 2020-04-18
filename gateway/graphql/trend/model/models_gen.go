@@ -25,7 +25,6 @@ type Growth struct {
 	Long   Arrow `json:"long"`
 }
 
-// トレンド用構造体
 type History struct {
 	SuggestID int      `json:"suggestId"`
 	Status    Progress `json:"status"`
@@ -34,14 +33,6 @@ type History struct {
 type Suggest struct {
 	Keyword       string          `json:"keyword"`
 	ChildSuggests []*ChildSuggest `json:"childSuggests"`
-}
-
-// アカウント用構造体
-type User struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Name      string `json:"name"`
-	CompanyID int    `json:"companyId"`
 }
 
 type Arrow string

@@ -1,4 +1,4 @@
-package graph
+package account
 
 import (
 	"context"
@@ -15,17 +15,15 @@ import (
 
 type Resolver struct {
 	userClient pbAccount.UserServiceClient
-	//trendClient pbTrend.suggestServiceClient
 }
 
-func NewGraphQLResolver() *Resolver {
+func NewAccountResolver() *Resolver {
 	return &Resolver{
-		userClient: pbAccount.NewUserServiceClient(getGRPCConn(os.Getenv("USER_SERVICE_ADDR"), xTraceID)),
+		userClient: pbAccount.NewUserServiceClient(getGRPCConn(os.Getenv("ACCOUNT_ADDR"), xTraceID)),
 	}
 }
 
 func getGRPCConn(target string, interceptors ...grpc.UnaryClientInterceptor) *grpc.ClientConn {
-	// インタセプタを使ってRPC共通の処理の追加
 	chain := grpc_middleware.ChainUnaryClient(interceptors...)
 	conn, err := grpc.Dial(target, grpc.WithInsecure(), grpc.WithUnaryInterceptor(chain))
 	if err != nil {

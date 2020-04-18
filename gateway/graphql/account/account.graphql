@@ -1,0 +1,16 @@
+type Query {
+  loginUser(email: String!, password: String!): String!
+}
+
+type Mutation {
+  registerUser(user: User!): Boolean!
+  updateUser(user: User!): Boolean!
+  deleteUser(user: User!): Boolean!
+}
+
+input User {
+  email: String!
+  password: String!
+  name: String!
+  companyId: Int!
+}
