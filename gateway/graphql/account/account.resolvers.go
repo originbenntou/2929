@@ -13,6 +13,7 @@ import (
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 	"github.com/originbenntou/2929BE/shared/logger"
 	"go.uber.org/zap"
+	"time"
 )
 
 func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (ok bool, err error) {
@@ -58,6 +59,9 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 		return "", err
 	}
 
+	// TODO: uid重複チェック => 上書き
+	// TODO: cid上限チェック => エラー（plan_idを返却してもらわないと）
+
 	// set id, company_id in Redis to session
 	if err = redis.Client.HSet(pbRes.Token, map[string]interface{}{
 		"uid": pbRes.User.Id,
@@ -65,9 +69,10 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 	}).Err(); err != nil {
 		return "", err
 	}
-
-	//a, _ := redis.Client.HGet(pbRes.Token, "uid").Result()
-	//b, _ := redis.Client.HGetAll(pbRes.Token).Result()
+	// expire 1 hour
+	if err = redis.Client.Expire(pbRes.Token, time.Hour*1).Err(); err != nil {
+		return "", err
+	}
 
 	return pbRes.Token, nil
 }
