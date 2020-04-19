@@ -6,7 +6,6 @@ package account
 import (
 	"context"
 	"fmt"
-
 	"github.com/originbenntou/2929BE/gateway/graphql/account/generated"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/model"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
@@ -19,7 +18,6 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (b
 		Name:      user.Name,
 		CompanyId: uint64(user.CompanyID),
 	})
-
 	if err != nil {
 		return false, err
 		//logger.Common.Error(err.Error())
@@ -36,11 +34,19 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, user model.User) (boo
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeleteUser(ctx context.Context, user model.User) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) VerifyUser(ctx context.Context, email string, password string) (string, error) {
+	pbToken, err := r.accountClient.VerifyUser(ctx, &pbAccount.VerifyUserRequest{
+		Email:    email,
+		Password: password,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return pbToken.Token, nil
 }
 
-func (r *queryResolver) LoginUser(ctx context.Context, email string, password string) (string, error) {
+func (r *queryResolver) RecoveryUser(ctx context.Context, email string) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
