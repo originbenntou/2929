@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/originbenntou/2929BE/gateway/interfaces/middleware"
 	"github.com/originbenntou/2929BE/shared/logger"
+	"log"
 	"net/http"
 	"os"
 
@@ -37,7 +37,7 @@ func main() {
 
 	if os.Getenv("ENV") == "LOCAL" {
 		r.Path("/").HandlerFunc(playground.Handler("GraphQL playground", "/account"))
-		logger.Common.Info(fmt.Sprintf("connect to http://localhost:%s/ for GraphQL playground", port))
+		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	}
 
 	if err := http.ListenAndServe(":"+port, r); err != nil {

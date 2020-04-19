@@ -1,7 +1,7 @@
 package account
 
 import (
-	"github.com/originbenntou/2929BE/gateway/grpc/client"
+	"github.com/originbenntou/2929BE/gateway/infrastructure/grpc/client"
 	"github.com/originbenntou/2929BE/gateway/interfaces/interceptor"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 	"os"

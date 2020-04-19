@@ -40,3 +40,10 @@ services:
       - "3306:3306"
     volumes:
       - ./mysql/data:/var/lib/mysql
+  redis:
+    image: "redis:latest"
+    container_name: 2929redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data

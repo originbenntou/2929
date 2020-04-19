@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/generated"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/model"
+	redis "github.com/originbenntou/2929BE/gateway/infrastructure/redis/client"
 	"github.com/originbenntou/2929BE/gateway/interfaces/support"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 	"github.com/originbenntou/2929BE/shared/logger"
@@ -56,6 +57,8 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 	if err != nil {
 		return "", err
 	}
+
+	redis.Client.Set("token", pbToken.Token, 10000000000000000)
 
 	return pbToken.Token, nil
 }
