@@ -9,6 +9,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - "ENV=LOCAL" #local
       - "ACCOUNT_ADDR=account:50051" #local
     volumes:
       - ./gateway:/go/src/github.com/originbenntou/2929BE/gateway #local

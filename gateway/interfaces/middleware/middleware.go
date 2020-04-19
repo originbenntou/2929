@@ -3,6 +3,8 @@ package middleware
 import (
 	"github.com/google/uuid"
 	"github.com/originbenntou/2929BE/gateway/interfaces/support"
+	"github.com/originbenntou/2929BE/shared/logger"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -24,6 +26,20 @@ func Tracing(next http.Handler) http.Handler {
 
 func newTraceID() string {
 	return uuid.New().String()
+}
+
+func Logging(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			logger.Common.Info(
+				"OK",
+				zap.String("TraceID", support.GetTraceIDFromContext(r.Context())),
+				zap.String("Method", r.Method),
+				zap.String("Request", r.RequestURI),
+			)
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
 
 //func NewAuthentication(

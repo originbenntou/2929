@@ -8,10 +8,19 @@ import (
 	"fmt"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/generated"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/model"
+	"github.com/originbenntou/2929BE/gateway/interfaces/support"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
+	"github.com/originbenntou/2929BE/shared/logger"
+	"go.uber.org/zap"
 )
 
-func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (bool, error) {
+func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (ok bool, err error) {
+	defer func() {
+		if err != nil {
+			logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
+		}
+	}()
+
 	pbUser, err := r.accountClient.RegisterUser(ctx, &pbAccount.RegisterUserRequest{
 		Email:     user.Email,
 		Password:  user.Password,
@@ -20,7 +29,6 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (b
 	})
 	if err != nil {
 		return false, err
-		//logger.Common.Error(err.Error())
 	}
 
 	if pbUser == nil {
@@ -34,7 +42,13 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, user model.User) (boo
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) VerifyUser(ctx context.Context, email string, password string) (string, error) {
+func (r *queryResolver) VerifyUser(ctx context.Context, email string, password string) (token string, err error) {
+	defer func() {
+		if err != nil {
+			logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
+		}
+	}()
+
 	pbToken, err := r.accountClient.VerifyUser(ctx, &pbAccount.VerifyUserRequest{
 		Email:    email,
 		Password: password,
