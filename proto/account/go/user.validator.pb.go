@@ -51,3 +51,25 @@ func (this *RegisterUserRequest) Validate() error {
 func (this *RegisterUserResponse) Validate() error {
 	return nil
 }
+
+var _regex_VerifyUserRequest_Email = regexp.MustCompile(`^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$`)
+var _regex_VerifyUserRequest_Password = regexp.MustCompile(`^[ -~]{8,32}$`)
+
+func (this *VerifyUserRequest) Validate() error {
+	if !_regex_VerifyUserRequest_Email.MatchString(this.Email) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Email", fmt.Errorf(`value '%v' must be a string conforming to regex "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"`, this.Email))
+	}
+	if this.Email == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Email", fmt.Errorf(`value '%v' must not be an empty string`, this.Email))
+	}
+	if !_regex_VerifyUserRequest_Password.MatchString(this.Password) {
+		return github_com_mwitkow_go_proto_validators.FieldError("Password", fmt.Errorf(`value '%v' must be a string conforming to regex "^[ -~]{8,32}$"`, this.Password))
+	}
+	if this.Password == "" {
+		return github_com_mwitkow_go_proto_validators.FieldError("Password", fmt.Errorf(`value '%v' must not be an empty string`, this.Password))
+	}
+	return nil
+}
+func (this *VerifyUserResponse) Validate() error {
+	return nil
+}

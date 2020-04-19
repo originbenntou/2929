@@ -6,7 +6,7 @@ type Query {
 type Mutation {
   registerUser(user: User!): Boolean!
   updateUser(user: User!): Boolean!
-  # deleteUser(user: User!): Boolean! # 削除しない
+  #deleteUser(user: User!): Boolean! #削除しない
 }
 
 input User {

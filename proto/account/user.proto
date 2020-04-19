@@ -21,18 +21,18 @@ message RegisterUserRequest {
 }
 
 message RegisterUserResponse {
-  uint64 user_id = 1;
+    uint64 user_id = 1;
 }
 
-//message VerifyUserRequest {
-//    string email = 1 [(validator.field) = {string_not_empty: true regex: "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"}];
-//    bytes password = 2 [(validator.field) = {string_not_empty: true length_gt:7 length_lt:33}];
-//}
-//
-//message VerifyUserResponse {
-//    User user = 1;
-//}
-//
+message VerifyUserRequest {
+    string email = 1 [(validator.field) = {string_not_empty: true regex: "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"}];
+    string password = 2 [(validator.field) = {string_not_empty: true regex: "^[ -~]{8,32}$"}];
+}
+
+message VerifyUserResponse {
+    string token = 1;
+}
+
 //message FindUserRequest {
 //    uint64 userId = 1 [(validator.field) = {string_not_empty: true int_gt: 1}];
 //}
@@ -43,6 +43,6 @@ message RegisterUserResponse {
 
 service UserService {
     rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse);
-//    rpc VerifyUser (VerifyUserRequest) returns (VerifyUserResponse);
+    rpc VerifyUser (VerifyUserRequest) returns (VerifyUserResponse);
 //    rpc FindUser (FindUserRequest) returns (FindUserResponse);
 }
