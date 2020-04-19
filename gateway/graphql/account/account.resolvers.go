@@ -50,7 +50,7 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 		}
 	}()
 
-	pbToken, err := r.accountClient.VerifyUser(ctx, &pbAccount.VerifyUserRequest{
+	pbRes, err := r.accountClient.VerifyUser(ctx, &pbAccount.VerifyUserRequest{
 		Email:    email,
 		Password: password,
 	})
@@ -58,9 +58,18 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 		return "", err
 	}
 
-	redis.Client.Set("token", pbToken.Token, 10000000000000000)
+	// set id, company_id in Redis to session
+	if err = redis.Client.HSet(pbRes.Token, map[string]interface{}{
+		"uid": pbRes.User.Id,
+		"cid": pbRes.User.CompanyId,
+	}).Err(); err != nil {
+		return "", err
+	}
 
-	return pbToken.Token, nil
+	//a, _ := redis.Client.HGet(pbRes.Token, "uid").Result()
+	//b, _ := redis.Client.HGetAll(pbRes.Token).Result()
+
+	return pbRes.Token, nil
 }
 
 func (r *queryResolver) RecoveryUser(ctx context.Context, email string) (bool, error) {

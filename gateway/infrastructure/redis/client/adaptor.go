@@ -1,7 +1,8 @@
 package client
 
 import (
-	gredis "github.com/go-redis/redis"
+	gredis "github.com/go-redis/redis/v7"
+	"github.com/originbenntou/2929BE/shared/logger"
 )
 
 var Client *gredis.Client
@@ -12,4 +13,9 @@ func init() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
+
+	_, err := Client.Ping().Result()
+	if err != nil {
+		logger.Common.Error(err.Error())
+	}
 }

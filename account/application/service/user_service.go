@@ -86,5 +86,11 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 
 	return &pbAccount.VerifyUserResponse{
 		Token: uuid.New().String(),
+		User: &pbAccount.User{
+			Id:        user.Id,
+			Email:     user.Email,
+			Name:      user.Name,
+			CompanyId: user.CompanyId,
+		},
 	}, nil
 }
