@@ -5,6 +5,8 @@ import (
 	"github.com/originbenntou/2929BE/shared/logger"
 )
 
+const EMPTY = gredis.Nil
+
 var Client *gredis.Client
 
 func init() {
@@ -18,4 +20,5 @@ func init() {
 	if err != nil {
 		logger.Common.Error(err.Error())
 	}
+
 }

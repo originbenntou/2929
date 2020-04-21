@@ -29,11 +29,13 @@ func main() {
 	// playground起動中は切る
 	//r.Use(middleware.Logging)
 
+	auth := middleware.NewAuthentication()
+
 	accountSrv := handler.NewDefaultServer(accountGen.NewExecutableSchema(accountGen.Config{Resolvers: account.NewAccountResolver()}))
 	trendSrv := handler.NewDefaultServer(trendGen.NewExecutableSchema(trendGen.Config{Resolvers: trend.NewTrendResolver()}))
 
 	r.Path("/account").Handler(accountSrv)
-	r.Path("/trend").Handler(trendSrv)
+	r.Path("/trend").Handler(auth(trendSrv))
 
 	if os.Getenv("ENV") == "LOCAL" {
 		r.Path("/").HandlerFunc(playground.Handler("GraphQL playground", "/account"))

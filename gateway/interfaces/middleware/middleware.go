@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/google/uuid"
+	redis "github.com/originbenntou/2929BE/gateway/infrastructure/redis/client"
 	"github.com/originbenntou/2929BE/gateway/interfaces/support"
 	"github.com/originbenntou/2929BE/shared/logger"
 	"go.uber.org/zap"
@@ -9,12 +11,22 @@ import (
 )
 
 const (
-	xRequestIDKey = "X-Request-Id"
+	XRequestIDKey = "X-Request-Id"
+	InValidCookie = `{
+  "error": {
+    "errors": [
+      {
+        "message": "Invalid cookie"
+      }
+    ],
+    "data": null
+  }
+}`
 )
 
 func Tracing(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		traceID := r.Header.Get(xRequestIDKey)
+		traceID := r.Header.Get(XRequestIDKey)
 		if traceID == "" {
 			traceID = newTraceID()
 		}
@@ -42,32 +54,27 @@ func Logging(next http.Handler) http.Handler {
 	})
 }
 
-//func NewAuthentication(
-//	userClient pbUser.UserServiceClient,
-//	sessionStore session.Store) func(next http.HandlerFunc) http.HandlerFunc {
-//	return func(next http.HandlerFunc) http.HandlerFunc {
-//		return func(w http.ResponseWriter, r *http.Request) {
-//			sessionID := session.GetSessionIDFromRequest(r)
-//			v, ok := sessionStore.Get(sessionID)
-//			if !ok {
-//				http.Redirect(w, r, "/login", http.StatusFound)
-//				return
-//			}
-//			userID, ok := v.(uint64)
-//			if !ok {
-//				http.Redirect(w, r, "/login", http.StatusFound)
-//				return
-//			}
-//			ctx := r.Context()
-//			resp, err := userClient.FindUser(ctx, &pbUser.FindUserRequest{
-//				UserId: userID,
-//			})
-//			if err != nil {
-//				http.Redirect(w, r, "/login", http.StatusFound)
-//				return
-//			}
-//			ctx = support.AddUserToContext(ctx, resp.User)
-//			next.ServeHTTP(w, r.WithContext(ctx))
-//		}
-//	}
-//}
+func NewAuthentication() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			uid, err := redis.Client.HGet("6b8a733-9d75-44c3-9cc9-34addc8f965a", "uid").Result()
+			if uid == "" || err == redis.EMPTY {
+				logger.Common.Info(err.Error())
+				http.Error(w, InValidCookie, http.StatusForbidden)
+				return
+			}
+
+			cid, err := redis.Client.HGet("6b85a733-9d75-44c3-9cc9-34addc8f965a", "cid").Result()
+			if cid == "" || err == redis.EMPTY {
+				logger.Common.Info(err.Error())
+				http.Error(w, InValidCookie, http.StatusForbidden)
+				return
+			}
+
+			fmt.Println(uid, cid, err)
+
+			//ctx := support.AddUserToContext(r.Context(), resp.User)
+			next.ServeHTTP(w, r.WithContext(r.Context()))
+		})
+	}
+}
