@@ -24,7 +24,7 @@ type userService struct {
 	repository.CompanyRepository
 }
 
-func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository) pbAccount.UserServiceServer {
+func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository) UserService {
 	return &userService{ur, cr}
 }
 

@@ -23,9 +23,11 @@ func NewRegistry(s *grpc.Server, db mysql.DBManager) Registry {
 
 func (r registry) Register() {
 	pbAccount.RegisterUserServiceServer(r.Server,
-		r.GetUserService(
-			r.GetUserRepository(r.DBManager),
-			r.GetCompanyRepository(r.DBManager),
+		r.GetAccountService(
+			r.GetUserService(
+				r.GetUserRepository(r.DBManager),
+				r.GetCompanyRepository(r.DBManager),
+			),
 		),
 	)
 
