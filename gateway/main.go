@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/gorilla/mux"
@@ -25,24 +26,32 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Use(middleware.Tracing)
-	// playground起動中は切る
+	// playground起動中は鬱陶しいので切っておく
 	//r.Use(middleware.Logging)
+	r.Use(middleware.Tracing)
+	r.Use(middleware.NewCORS)
 
 	auth := middleware.NewAuthentication()
 
-	accountSrv := handler.NewDefaultServer(accountGen.NewExecutableSchema(accountGen.Config{Resolvers: account.NewAccountResolver()}))
-	trendSrv := handler.NewDefaultServer(trendGen.NewExecutableSchema(trendGen.Config{Resolvers: trend.NewTrendResolver()}))
+	aSvc := handler.NewDefaultServer(accountGen.NewExecutableSchema(accountGen.Config{Resolvers: account.NewAccountResolver()}))
+	tSvc := handler.NewDefaultServer(trendGen.NewExecutableSchema(trendGen.Config{Resolvers: trend.NewTrendResolver()}))
 
-	r.Path("/account").Handler(accountSrv)
-	r.Path("/trend").Handler(auth(trendSrv))
+	r.Path("/account").Handler(aSvc)
+	r.Path("/trend").Handler(auth(tSvc))
 
 	if os.Getenv("ENV") == "LOCAL" {
 		r.Path("/").HandlerFunc(playground.Handler("GraphQL playground", "/account"))
 		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	}
 
-	if err := http.ListenAndServe(":"+port, r); err != nil {
+	srv := &http.Server{
+		Handler:      r,
+		Addr:         ":8080",
+		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
 		logger.Common.Fatal(err.Error())
 	}
 }

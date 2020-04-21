@@ -17,6 +17,8 @@ type Resolver struct {
 
 func NewAccountResolver() *Resolver {
 	return &Resolver{
-		accountClient: pbAccount.NewUserServiceClient(client.GetGrpcConn(os.Getenv("ACCOUNT_ADDR"), interceptor.XTraceID)),
+		accountClient: pbAccount.NewUserServiceClient(
+			client.GetGrpcConn(os.Getenv("ACCOUNT_ADDR"), interceptor.XTraceID),
+		),
 	}
 }
