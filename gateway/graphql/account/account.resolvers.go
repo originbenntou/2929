@@ -49,6 +49,9 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 		if err != nil {
 			logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
 		}
+		//if err := redis.Client.Close(); err != nil {
+		//	logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
+		//}
 	}()
 
 	pbRes, err := r.accountClient.VerifyUser(ctx, &pbAccount.VerifyUserRequest{
@@ -59,22 +62,36 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 		return "", err
 	}
 
-	// TODO: uid重複チェック => 上書き
+	token = pbRes.Token
+	uid := pbRes.User.Id
+	cid := pbRes.User.CompanyId
+
+	// token重複チェック
+	// 一意性は保証されているが、完璧でないためケア
+	// tokenが重複 + uidが別 => token再発行
+
+	// tokenが重複 + uidが同じ => token上書き
+
+	// uid重複チェック
+	if err := setUid(uid); err != nil {
+		return "", err
+	}
+
 	// TODO: cid上限チェック => エラー（plan_idを返却してもらわないと）
 
 	// set id, company_id in Redis to session
-	if err = redis.Client.HSet(pbRes.Token, map[string]interface{}{
-		"uid": pbRes.User.Id,
-		"cid": pbRes.User.CompanyId,
+	if err = redis.TokenClient.HSet(token, map[string]interface{}{
+		"uid": uid,
+		"cid": cid,
 	}).Err(); err != nil {
 		return "", err
 	}
 	// expire 1 hour
-	if err = redis.Client.Expire(pbRes.Token, time.Hour*1).Err(); err != nil {
+	if err = redis.TokenClient.Expire(token, time.Hour*1).Err(); err != nil {
 		return "", err
 	}
 
-	return pbRes.Token, nil
+	return token, nil
 }
 
 func (r *queryResolver) RecoveryUser(ctx context.Context, email string) (bool, error) {
@@ -89,3 +106,28 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+func setUid(id uint64) error {
+	ul, err := redis.UidClient.LRange("user", 0, -1).Result()
+	if err != nil {
+		return err
+	}
+
+	if !isContain(id, ul) {
+		_, err := redis.CidClient.RPush("user", id).Result()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func isContain(t uint64, list []string) bool {
+	for _, v := range list {
+		if string(t) == v {
+			return true
+		}
+	}
+	return false
+}

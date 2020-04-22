@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	redis "github.com/originbenntou/2929BE/gateway/infrastructure/redis/client"
 	"github.com/originbenntou/2929BE/gateway/interfaces/support"
@@ -57,21 +56,28 @@ func Logging(next http.Handler) http.Handler {
 func NewAuthentication() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			uid, err := redis.Client.HGet("6b8a733-9d75-44c3-9cc9-34addc8f965a", "uid").Result()
+			defer func() {
+				//if err := redis.Client.Close(); err != nil {
+				//	logger.Common.Info(err.Error())
+				//	http.Error(w, InValidCookie, http.StatusForbidden)
+				//	return
+				//}
+			}()
+
+			// FIXME: tokenが存在すればOKにする
+			uid, err := redis.TokenClient.HGet("d0b50ce2-49f4-4cb7-b0e6-6acfc1d98a0a", "uid").Result()
 			if uid == "" || err == redis.EMPTY {
 				logger.Common.Info(err.Error())
 				http.Error(w, InValidCookie, http.StatusForbidden)
 				return
 			}
 
-			cid, err := redis.Client.HGet("6b85a733-9d75-44c3-9cc9-34addc8f965a", "cid").Result()
+			cid, err := redis.TokenClient.HGet("d0b50ce2-49f4-4cb7-b0e6-6acfc1d98a0a", "cid").Result()
 			if cid == "" || err == redis.EMPTY {
 				logger.Common.Info(err.Error())
 				http.Error(w, InValidCookie, http.StatusForbidden)
 				return
 			}
-
-			fmt.Println(uid, cid, err)
 
 			//ctx := support.AddUserToContext(r.Context(), resp.User)
 			next.ServeHTTP(w, r.WithContext(r.Context()))
