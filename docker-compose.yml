@@ -6,6 +6,8 @@ services:
       # dockerfile: gateway/Dockerfile #prd
       dockerfile: gateway/docker-local/Dockerfile #local
     container_name: 2929gateway
+    depends_on:
+      - "mysql"
     ports:
       - "8080:8080"
     environment:
@@ -19,6 +21,8 @@ services:
       # dockerfile: account/Dockerfile #prd
       dockerfile: account/docker-local/Dockerfile #local
     container_name: 2929account
+    depends_on:
+      - "mysql"
     ports:
       - "50051:50051"
     environment:
@@ -33,7 +37,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: account, trend
+      MYSQL_DATABASE: account
       MYSQL_USER: 2929
       MYSQL_PASSWORD: 2929
     ports:
