@@ -16,6 +16,6 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install $MAIN_PATH
 
 FROM alpine:latest
 ENV TZ Asia/Tokyo
+RUN mkdir -p /var/log/ap && touch /var/log/ap/ap.log
 COPY --from=builder /go/bin/account /go/bin/account
-
 ENTRYPOINT ["/go/bin/account"]

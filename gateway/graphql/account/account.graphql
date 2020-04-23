@@ -1,0 +1,17 @@
+type Query {
+  verifyUser(email: String!, password: String!): String!
+  recoveryUser(email: String!): Boolean!
+}
+
+type Mutation {
+  registerUser(user: User!): Boolean!
+  updateUser(user: User!): Boolean!
+  #deleteUser(user: User!): Boolean! #削除しない
+}
+
+input User {
+  email: String!
+  password: String!
+  name: String!
+  companyId: Int!
+}

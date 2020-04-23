@@ -1,19 +1,7 @@
-# v0.0.1a
-
 type Query {
-  verifyUser(user: User!): String!
   trendSearch(keyword: String!): Int!
   trendHistory: [History]!
   trendSuggest(suggestId: Int!): [Suggest!]!
-}
-
-type Mutation {
-  createUser(user: User!): Boolean!
-}
-
-input User {
-  email: String!
-  password: String!
 }
 
 type History {

@@ -35,26 +35,27 @@ func (r userRepository) FindUserByEmail(ctx context.Context, email string) (m *m
 		return nil, err
 	}
 
-	// no match record is ok
-	if !rows.Next() {
-		return nil, nil
-	}
-
 	m = &model.User{}
-	c := 0
+	var ms []*model.User
 	for rows.Next() {
 		if err := rows.StructScan(m); err != nil {
 			return nil, err
 		}
-		c++
+		ms = append(ms, m)
 	}
 
-	if c > 1 {
+	// no match record is ok, return empty
+	if len(ms) == 0 {
+		return nil, nil
+	}
+
+	// more than one record is error
+	if len(ms) > 1 {
 		return nil, errors.New("found user more than 1 by: " + email)
 	}
 
 	// one match record
-	return m, nil
+	return ms[0], nil
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uint64, err error) {

@@ -39,21 +39,3 @@ func SafeGetUserIDFromContext(ctx context.Context) (userID uint64, err error) {
 	}
 	return userID, nil
 }
-
-const metadataKeyTraceID string = "x-trace-id"
-
-func GetTraceIDFromContext(ctx context.Context) string {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return ""
-	}
-	values := md.Get(metadataKeyTraceID)
-	if len(values) < 1 {
-		return ""
-	}
-	return values[0]
-}
-
-func AddTraceIDToContext(ctx context.Context, traceID string) context.Context {
-	return metadata.AppendToOutgoingContext(ctx, metadataKeyTraceID, traceID)
-}

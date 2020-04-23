@@ -12,7 +12,9 @@ RUN go mod download
 
 COPY . $WORK_DIR
 
-# ホットリロード
+RUN mkdir -p /var/log/ap && touch /var/log/ap/ap.log
+
+# HotReload for LOCAL
 WORKDIR $MAIN_PATH
 RUN go get github.com/pilu/fresh
 CMD ["fresh", "-c", "docker-local/fresh/runner.conf"]

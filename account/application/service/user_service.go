@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/originbenntou/2929BE/account/domain/model"
 	"github.com/originbenntou/2929BE/account/domain/repository"
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
@@ -15,6 +16,7 @@ import (
 
 type UserService interface {
 	RegisterUser(context.Context, *pbAccount.RegisterUserRequest) (*pbAccount.RegisterUserResponse, error)
+	VerifyUser(context.Context, *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error)
 }
 
 type userService struct {
@@ -22,7 +24,7 @@ type userService struct {
 	repository.CompanyRepository
 }
 
-func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository) pbAccount.UserServiceServer {
+func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository) UserService {
 	return &userService{ur, cr}
 }
 
@@ -65,5 +67,30 @@ func (s userService) RegisterUser(ctx context.Context, pbReq *pbAccount.Register
 
 	return &pbAccount.RegisterUserResponse{
 		UserId: uid,
+	}, nil
+}
+
+func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUserRequest) (*pbAccount.VerifyUserResponse, error) {
+	user, err := s.FindUserByEmail(ctx, pbReq.Email)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if user == nil {
+		return nil, status.Error(codes.NotFound, errors.New("user is not found: "+pbReq.GetEmail()).Error())
+	}
+
+	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(pbReq.Password)); err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	return &pbAccount.VerifyUserResponse{
+		Token: uuid.New().String(),
+		User: &pbAccount.User{
+			Id:        user.Id,
+			Email:     user.Email,
+			Name:      user.Name,
+			CompanyId: user.CompanyId,
+		},
 	}, nil
 }

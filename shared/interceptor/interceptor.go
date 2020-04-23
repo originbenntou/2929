@@ -6,6 +6,8 @@ import (
 	"github.com/originbenntou/2929BE/shared/md"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func XTraceID() grpc.UnaryServerInterceptor {
@@ -28,11 +30,11 @@ func Logging() grpc.UnaryServerInterceptor {
 
 func XUserID() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		//userID, err := md.SafeGetUserIDFromContext(ctx)
-		//if err != nil {
-		//	return nil, status.Error(codes.InvalidArgument, err.Error())
-		//}
-		//ctx = md.AddUserIDToContext(ctx, userID)
+		userID, err := md.SafeGetUserIDFromContext(ctx)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		ctx = md.AddUserIDToContext(ctx, userID)
 		return handler(ctx, req)
 	}
 }
