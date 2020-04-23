@@ -7,12 +7,13 @@ DROP TABLE IF EXISTS suggest;
 CREATE TABLE suggest (
   id INT unsigned NOT NULL auto_increment,
   keyword VARCHAR(255) NOT NULL,
+  date DATE NOT NULL,
   result json DEFAULT NULL,
   status tinyint(1) NOT NULL DEFAULT 0,
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY (keyword)
+  UNIQUE KEY (keyword, date)
 ) COMMENT 'サジェストキーワード';
 
 DROP TABLE IF EXISTS history;

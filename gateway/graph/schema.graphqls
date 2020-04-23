@@ -1,6 +1,10 @@
+# v0.0.1a
+
 type Query {
-  verifyUser(user: User!): Boolean!
-  findTrend(word: String!): [Suggest!]!
+  verifyUser(user: User!): String!
+  trendSearch(keyword: String!): Int!
+  trendHistory: [History]!
+  trendSuggest(suggestId: Int!): [Suggest!]!
 }
 
 type Mutation {
@@ -12,8 +16,18 @@ input User {
   password: String!
 }
 
+type History {
+  suggestId: Int!
+  status: Progress!
+}
+
+enum Progress {
+  INPROGRESS
+  COMPLETED
+}
+
 type Suggest {
-  word: String!
+  keyword: String!
   childSuggests: [ChildSuggest!]!
 }
 
