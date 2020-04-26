@@ -11,6 +11,8 @@ const (
 	ConnMaxLifetime = 0
 )
 
+const InvalidID = 0
+
 type accountConfig struct {
 	host            string
 	port            string

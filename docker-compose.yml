@@ -27,6 +27,7 @@ services:
       - "50051:50051"
     environment:
       - "ENV=LOCAL" #local
+      - "PORT=:50051" #local
     volumes:
       - ./account:/go/src/github.com/originbenntou/2929BE/account #local
   mysql:

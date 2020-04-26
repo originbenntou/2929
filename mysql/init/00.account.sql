@@ -36,3 +36,16 @@ CREATE TABLE user (
   UNIQUE KEY (email),
   FOREIGN KEY (company_id) REFERENCES company(id)
 ) COMMENT 'ユーザー情報';
+
+DROP TABLE IF EXISTS session;
+CREATE TABLE session (
+  id INT unsigned NOT NULL auto_increment,
+  token VARCHAR(255) NOT NULL,
+  user_id INT unsigned NOT NULL,
+  company_id INT unsigned NOT NULL,
+  created_at datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  updated_at datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (id),
+  FOREIGN KEY (user_id) REFERENCES user(id),
+  FOREIGN KEY (company_id) REFERENCES company(id)
+) COMMENT 'セッション情報';

@@ -13,3 +13,7 @@ func (c Container) GetUserRepository(db mysql.DBManager) repository.UserReposito
 func (c Container) GetCompanyRepository(db mysql.DBManager) repository.CompanyRepository {
 	return repo.NewCompanyRepository(db)
 }
+
+func (c Container) GetSessionRepository(db mysql.DBManager) repository.SessionRepository {
+	return repo.NewSessionRepository(db)
+}

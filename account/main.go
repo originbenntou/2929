@@ -21,6 +21,8 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+var port = os.Getenv("PORT")
+
 func main() {
 	srv := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
@@ -45,11 +47,11 @@ func main() {
 	reflection.Register(srv)
 
 	go func() {
-		listener, err := net.Listen("tcp", constant.Port)
+		listener, err := net.Listen("tcp", port)
 		if err != nil {
 			log.Fatalf("failed to create listener: %s", err)
 		}
-		log.Println("start server on port", constant.Port)
+		log.Println("start server on port", port)
 		if err := srv.Serve(listener); err != nil {
 			log.Println("failed to exit serve: ", err)
 		}

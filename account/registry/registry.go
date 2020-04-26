@@ -27,6 +27,7 @@ func (r registry) Register() {
 			r.GetUserService(
 				r.GetUserRepository(r.DBManager),
 				r.GetCompanyRepository(r.DBManager),
+				r.GetSessionRepository(r.DBManager),
 			),
 		),
 	)

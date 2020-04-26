@@ -22,10 +22,11 @@ type UserService interface {
 type userService struct {
 	repository.UserRepository
 	repository.CompanyRepository
+	repository.SessionRepository
 }
 
-func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository) UserService {
-	return &userService{ur, cr}
+func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository, sr repository.SessionRepository) UserService {
+	return &userService{ur, cr, sr}
 }
 
 func (s userService) RegisterUser(ctx context.Context, pbReq *pbAccount.RegisterUserRequest) (*pbAccount.RegisterUserResponse, error) {
@@ -83,6 +84,43 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(pbReq.Password)); err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
+
+	// forbidden double login
+	token, err := s.FindValidTokenByUserId(ctx, user.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// if double login
+	if token != "" {
+		// update existing session to extend expire
+		if err := s.UpdateSession(ctx, user.Id); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		return &pbAccount.VerifyUserResponse{
+			Token: token,
+			User: &pbAccount.User{
+				Id:        user.Id,
+				Email:     user.Email,
+				Name:      user.Name,
+				CompanyId: user.CompanyId,
+			},
+		}, nil
+	}
+
+	// if new login
+	if err = s.CreateSession(ctx, &model.Session{
+		Token:     uuid.New().String(),
+		UserId:    user.Id,
+		CompanyId: user.CompanyId,
+	}); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// forbidden login over limit by plan
+	// 会社IDで既に有効なセッションの数を取得
+	// 数がプランの上限を超えていたら不正
 
 	return &pbAccount.VerifyUserResponse{
 		Token: uuid.New().String(),

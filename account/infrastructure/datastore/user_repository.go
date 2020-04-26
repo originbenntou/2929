@@ -5,13 +5,12 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/originbenntou/2929BE/account/constant"
 	"github.com/originbenntou/2929BE/account/domain/model"
 	"github.com/originbenntou/2929BE/account/domain/repository"
 	"github.com/originbenntou/2929BE/shared/logger"
 	"github.com/originbenntou/2929BE/shared/mysql"
 )
-
-const InvalidID = 0
 
 type userRepository struct {
 	db mysql.DBManager
@@ -36,32 +35,32 @@ func (r userRepository) FindUserByEmail(ctx context.Context, email string) (m *m
 	}
 
 	m = &model.User{}
-	var ms []*model.User
+	var list []*model.User
 	for rows.Next() {
 		if err := rows.StructScan(m); err != nil {
 			return nil, err
 		}
-		ms = append(ms, m)
+		list = append(list, m)
 	}
 
 	// no match record is ok, return empty
-	if len(ms) == 0 {
+	if len(list) == 0 {
 		return nil, nil
 	}
 
 	// more than one record is error
-	if len(ms) > 1 {
+	if len(list) > 1 {
 		return nil, errors.New("found user more than 1 by: " + email)
 	}
 
 	// one match record
-	return ms[0], nil
+	return list[0], nil
 }
 
 func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uint64, err error) {
 	tx, err := r.db.Begin()
 	if err != nil {
-		return InvalidID, err
+		return constant.InvalidID, err
 	}
 
 	defer func() {
@@ -83,17 +82,17 @@ func (r userRepository) CreateUser(ctx context.Context, req *model.User) (id uin
 
 	affect, err := result.RowsAffected()
 	if err != nil {
-		return InvalidID, err
+		return constant.InvalidID, err
 	}
 
 	if affect != 1 {
 		msg := fmt.Sprintf("total affected: %d", affect)
-		return InvalidID, errors.New(msg)
+		return constant.InvalidID, errors.New(msg)
 	}
 
 	lid, err := result.LastInsertId()
 	if err != nil {
-		return InvalidID, err
+		return constant.InvalidID, err
 	}
 
 	return uint64(lid), nil

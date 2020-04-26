@@ -2,11 +2,10 @@ package model
 
 import "time"
 
-type User struct {
+type Session struct {
 	Id        uint64    `db:"id"`
-	Email     string    `db:"email"`
-	PassHash  []byte    `db:"password"`
-	Name      string    `db:"name"`
+	Token     string    `db:"token"`
+	UserId    uint64    `db:"user_id"`
 	CompanyId uint64    `db:"company_id"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
