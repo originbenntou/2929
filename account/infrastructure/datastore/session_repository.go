@@ -30,21 +30,19 @@ func (r sessionRepository) FindValidTokenByUserId(ctx context.Context, uid uint6
 	}()
 
 	// valid session is in 24 hour
-	q := "SELECT * FROM session WHERE user_id = :user_id AND DATE_ADD(updated_at, INTERVAL 1 DAY) > NOW()"
+	q := "SELECT token FROM session WHERE user_id = :user_id AND DATE_ADD(updated_at, INTERVAL 1 DAY) > NOW()"
 
 	rows, err := r.db.NamedQueryContext(ctx, q, map[string]interface{}{"user_id": uid})
 	if err != nil {
 		return "", err
 	}
 
-	// FIXME: 特定のカラムだけ取り出せないので、全カラムを取得
-	m := &model.Session{}
-	var list []*model.Session
+	var list []string
 	for rows.Next() {
-		if err := rows.StructScan(m); err != nil {
+		if err := rows.StructScan(&token); err != nil {
 			return "", err
 		}
-		list = append(list, m)
+		list = append(list, token)
 	}
 
 	// no match record is ok, return empty
@@ -58,7 +56,7 @@ func (r sessionRepository) FindValidTokenByUserId(ctx context.Context, uid uint6
 	}
 
 	// one match record
-	return list[0].Token, nil
+	return list[0], nil
 }
 
 func (r sessionRepository) CreateSession(ctx context.Context, req *model.Session) (err error) {

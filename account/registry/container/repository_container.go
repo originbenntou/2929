@@ -17,3 +17,7 @@ func (c Container) GetCompanyRepository(db mysql.DBManager) repository.CompanyRe
 func (c Container) GetSessionRepository(db mysql.DBManager) repository.SessionRepository {
 	return repo.NewSessionRepository(db)
 }
+
+func (c Container) GetPlanRepository(db mysql.DBManager) repository.PlanRepository {
+	return repo.NewPlanRepository(db)
+}

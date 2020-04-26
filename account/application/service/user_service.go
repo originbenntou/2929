@@ -23,10 +23,21 @@ type userService struct {
 	repository.UserRepository
 	repository.CompanyRepository
 	repository.SessionRepository
+	repository.PlanRepository
 }
 
-func NewUserService(ur repository.UserRepository, cr repository.CompanyRepository, sr repository.SessionRepository) UserService {
-	return &userService{ur, cr, sr}
+func NewUserService(
+	ur repository.UserRepository,
+	cr repository.CompanyRepository,
+	sr repository.SessionRepository,
+	pr repository.PlanRepository,
+) UserService {
+	return &userService{
+		ur,
+		cr,
+		sr,
+		pr,
+	}
 }
 
 func (s userService) RegisterUser(ctx context.Context, pbReq *pbAccount.RegisterUserRequest) (*pbAccount.RegisterUserResponse, error) {
@@ -91,7 +102,12 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if count > 0 {
+	capacity, err := s.FindCapacityByCompanyId(ctx, user.CompanyId)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	if count > capacity {
 		return nil, status.Error(codes.Unauthenticated, errors.New("forbidden login over limit by plan").Error())
 	}
 
