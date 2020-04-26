@@ -22,7 +22,7 @@ func NewSessionRepository(db mysql.DBManager) repository.SessionRepository {
 	return &sessionRepository{db}
 }
 
-func (r sessionRepository) FindValidTokenByUserId(ctx context.Context, uid uint64) (token string, err error) {
+func (r sessionRepository) FindExistTokenByUserId(ctx context.Context, uid uint64) (token string, err error) {
 	defer func() {
 		if err != nil {
 			logger.Common.Error(err.Error())

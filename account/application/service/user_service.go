@@ -97,55 +97,23 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 	}
 
 	// forbidden login over limit by plan
-	count, err := s.CountValidSessionByCompanyId(ctx, user.CompanyId)
+	isOver, err := s.isLoginOverCapacityOfCompanyPlan(ctx, user.CompanyId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	capacity, err := s.FindCapacityByCompanyId(ctx, user.CompanyId)
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
-
-	if count > capacity {
+	if isOver {
 		return nil, status.Error(codes.Unauthenticated, errors.New("forbidden login over limit by plan").Error())
 	}
 
-	// forbidden double login
-	token, err := s.FindValidTokenByUserId(ctx, user.Id)
+	// if double login, continue to use old token
+	// if new login, generate new token
+	token, err := s.getCorrectTokenForUser(ctx, user)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// if double login
-	if token != "" {
-		// update existing session to extend expire
-		if err := s.UpdateSession(ctx, user.Id); err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		return &pbAccount.VerifyUserResponse{
-			Token: token,
-			User: &pbAccount.User{
-				Id:        user.Id,
-				Email:     user.Email,
-				Name:      user.Name,
-				CompanyId: user.CompanyId,
-			},
-		}, nil
-	}
-
-	// if new login
-	if err = s.CreateSession(ctx, &model.Session{
-		Token:     uuid.New().String(),
-		UserId:    user.Id,
-		CompanyId: user.CompanyId,
-	}); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pbAccount.VerifyUserResponse{
-		Token: uuid.New().String(),
+		Token: token,
 		User: &pbAccount.User{
 			Id:        user.Id,
 			Email:     user.Email,
@@ -153,4 +121,49 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 			CompanyId: user.CompanyId,
 		},
 	}, nil
+}
+
+func (s userService) isLoginOverCapacityOfCompanyPlan(ctx context.Context, cid uint64) (bool, error) {
+	count, err := s.CountValidSessionByCompanyId(ctx, cid)
+	if err != nil {
+		return false, err
+	}
+
+	capacity, err := s.FindCapacityByCompanyId(ctx, cid)
+	if err != nil {
+		return false, err
+	}
+
+	return count > capacity, nil
+}
+
+func (s userService) getCorrectTokenForUser(ctx context.Context, user *model.User) (string, error) {
+	oldToken, err := s.FindExistTokenByUserId(ctx, user.Id)
+	if err != nil {
+		return "", err
+	}
+
+	// if token already exists, it is double login
+	if oldToken != "" {
+		// update existing session to extend expire
+		if err := s.UpdateSession(ctx, user.Id); err != nil {
+			return "", err
+		}
+
+		// continue to use old token
+		return oldToken, nil
+	}
+
+	// if new login
+	newToken := uuid.New().String()
+	// create new session
+	if err = s.CreateSession(ctx, &model.Session{
+		Token:     newToken,
+		UserId:    user.Id,
+		CompanyId: user.CompanyId,
+	}); err != nil {
+		return "", err
+	}
+
+	return newToken, nil
 }
