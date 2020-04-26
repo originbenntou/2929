@@ -85,6 +85,16 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
+	// forbidden login over limit by plan
+	count, err := s.CountValidSessionByCompanyId(ctx, user.CompanyId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if count > 0 {
+		return nil, status.Error(codes.Unauthenticated, errors.New("forbidden login over limit by plan").Error())
+	}
+
 	// forbidden double login
 	token, err := s.FindValidTokenByUserId(ctx, user.Id)
 	if err != nil {
@@ -117,10 +127,6 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 	}); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-
-	// forbidden login over limit by plan
-	// 会社IDで既に有効なセッションの数を取得
-	// 数がプランの上限を超えていたら不正
 
 	return &pbAccount.VerifyUserResponse{
 		Token: uuid.New().String(),

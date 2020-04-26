@@ -37,7 +37,7 @@ func (r sessionRepository) FindValidTokenByUserId(ctx context.Context, uid uint6
 		return "", err
 	}
 
-	// FIXME: 特定のカラムだけ取り出せない...
+	// FIXME: 特定のカラムだけ取り出せないので、全カラムを取得
 	m := &model.Session{}
 	var list []*model.Session
 	for rows.Next() {
@@ -134,4 +134,28 @@ func (r sessionRepository) UpdateSession(ctx context.Context, uid uint64) (err e
 	}
 
 	return nil
+}
+
+func (r sessionRepository) CountValidSessionByCompanyId(ctx context.Context, cid uint64) (c uint64, err error) {
+	defer func() {
+		if err != nil {
+			logger.Common.Error(err.Error())
+		}
+	}()
+
+	// valid session is in 24 hour
+	q := "SELECT COUNT(*) FROM session WHERE company_id = :company_id AND DATE_ADD(updated_at, INTERVAL 1 DAY) > NOW()"
+
+	rows, err := r.db.NamedQueryContext(ctx, q, map[string]interface{}{"company_id": cid})
+	if err != nil {
+		return 0, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&c); err != nil {
+			return 0, err
+		}
+	}
+
+	return
 }
