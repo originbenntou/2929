@@ -39,7 +39,7 @@ func (r sessionRepository) FindExistTokenByUserId(ctx context.Context, uid uint6
 
 	var list []string
 	for rows.Next() {
-		if err := rows.StructScan(&token); err != nil {
+		if err := rows.Scan(&token); err != nil {
 			return "", err
 		}
 		list = append(list, token)
