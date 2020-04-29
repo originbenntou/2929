@@ -1,17 +1,72 @@
 type Query {
-  verifyUser(email: String!, password: String!): String!
-  recoveryUser(email: String!): Boolean!
+  # パスワード再登録用のメール送信し、その結果を返却
+  ## Not implement
+  recoveryUser(
+    # ユーザーメールアドレス
+    # Validate is valid e-mail address
+    # https://github.com/TrendFindProject/trendfindproject/blob/master/backend/proto/account/user.proto#L17
+    email: String!
+  ): Boolean!
+
+  # ログインを実行し、そのセッションIDとなるトークンを返却
+  # 正常系 httpステータス: 200, code: 0
+  # 異常系 httpステータス: 200, code: (後述)
+  # 返却code一覧
+  ## 3.  入力パラメータエラー
+  ## 5.  ユーザー未存在エラー
+  ## 7.  ログイン上限超過エラー
+  ## 13. サーバーエラー
+  ## 16. パスワード照合エラー
+  ### 上記以外は未知のエラー
+  verifyUser(
+    # ユーザーメールアドレス
+    # Validate is valid e-mail address
+    # https://github.com/TrendFindProject/trendfindproject/blob/master/backend/proto/account/user.proto#L17
+    email: String!,
+    # ユーザーパスワード
+    # Validate is half-width English numbers and letters, using more than 8 characters but less than 32
+    # https://github.com/TrendFindProject/trendfindproject/blob/master/backend/proto/account/user.proto#L18
+    password: String!
+  ): String!
 }
 
 type Mutation {
-  registerUser(user: User!): Boolean!
-  updateUser(user: User!): Boolean!
-  #deleteUser(user: User!): Boolean! #削除しない
+  # ユーザーを登録し、その結果を返却
+  # 正常系 httpステータス: 200, code: 0
+  # 異常系 httpステータス: 200, code: (後述)
+  # 返却code一覧
+  ## 3.  入力パラメータエラー
+  ## 6.  ユーザー存在エラー
+  ## 13. サーバーエラー
+  ### 上記以外は未知のエラー
+  registerUser(
+    # User struct
+    user: User!
+  ): Boolean!
+
+  # ユーザーを再登録し、その結果を返却
+  # パスワード再登録画面よりリクエストされる
+  ## Not implement
+  updateUser(
+    # User struct
+    user: User!
+  ): Boolean!
 }
 
 input User {
+  # ユーザーメールアドレス
+  # Validate is valid e-mail address
+  # https://github.com/TrendFindProject/trendfindproject/blob/master/backend/proto/account/user.proto#L17
   email: String!
+
+  # ユーザーパスワード
+  # Validate is half-width English numbers and letters, using more than 8 characters but less than 32
+  # https://github.com/TrendFindProject/trendfindproject/blob/master/backend/proto/account/user.proto#L18
   password: String!
+
+  # ユーザーネーム
   name: String!
+
+  # ユーザー所属の会社ID
   companyId: Int!
 }

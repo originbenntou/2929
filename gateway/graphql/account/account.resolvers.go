@@ -6,6 +6,7 @@ package account
 import (
 	"context"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/generated"
 	"github.com/originbenntou/2929BE/gateway/graphql/account/model"
 	redis "github.com/originbenntou/2929BE/gateway/infrastructure/redis/client"
@@ -13,6 +14,7 @@ import (
 	pbAccount "github.com/originbenntou/2929BE/proto/account/go"
 	"github.com/originbenntou/2929BE/shared/logger"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/status"
 	"time"
 )
 
@@ -21,6 +23,8 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, user model.User) (o
 		if err != nil {
 			logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
 		}
+
+		registerCode(ctx, err)
 	}()
 
 	pbUser, err := r.accountClient.RegisterUser(ctx, &pbAccount.RegisterUserRequest{
@@ -49,9 +53,8 @@ func (r *queryResolver) VerifyUser(ctx context.Context, email string, password s
 		if err != nil {
 			logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
 		}
-		//if err := redis.Client.Close(); err != nil {
-		//	logger.Common.Info(err.Error(), zap.String("TraceID", support.GetTraceIDFromContext(ctx)))
-		//}
+
+		registerCode(ctx, err)
 	}()
 
 	pbRes, err := r.accountClient.VerifyUser(ctx, &pbAccount.VerifyUserRequest{
@@ -93,3 +96,13 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+func registerCode(ctx context.Context, err error) {
+	if err != nil {
+		graphql.RegisterExtension(ctx, "code", status.Code(err))
+	} else {
+		graphql.RegisterExtension(ctx, "code", 0)
+	}
+
+	return
+}

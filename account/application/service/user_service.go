@@ -102,7 +102,7 @@ func (s userService) VerifyUser(ctx context.Context, pbReq *pbAccount.VerifyUser
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if isOver {
-		return nil, status.Error(codes.Unauthenticated, errors.New("forbidden login over limit by plan").Error())
+		return nil, status.Error(codes.PermissionDenied, errors.New("forbidden login over limit by plan").Error())
 	}
 
 	// if double login, continue to use old token
